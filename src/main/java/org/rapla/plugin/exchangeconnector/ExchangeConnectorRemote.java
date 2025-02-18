@@ -1,7 +1,6 @@
 package org.rapla.plugin.exchangeconnector;
 
 import org.rapla.framework.RaplaException;
-
 import org.rapla.framework.TypedComponentRole;
 
 import javax.ws.rs.GET;
