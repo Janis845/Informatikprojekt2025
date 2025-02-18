@@ -14,6 +14,10 @@ package org.rapla.plugin.availability.menu.server;
 *--------------------------------------------------------------------------*/
 
 import org.jetbrains.annotations.NotNull;
+
+
+
+
 import org.rapla.RaplaResources;
 import org.rapla.components.util.IOUtil;
 import org.rapla.components.util.ParseDateException;
@@ -29,13 +33,19 @@ import org.rapla.facade.RaplaFacade;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.framework.internal.AbstractRaplaLocale;
 import org.rapla.logger.Logger;
-import org.rapla.plugin.abstractcalendar.server.AbstractHTMLCalendarPage;
 import org.rapla.plugin.availability.AvailabilityResources;
+import org.rapla.plugin.availability.availabilityWebpage;
 import org.rapla.plugin.availability.menu.AvailabiltyPlugin;
 import org.rapla.plugin.urlencryption.UrlEncryption;
 import org.rapla.plugin.urlencryption.UrlEncryptionPlugin;
 import org.rapla.server.extensionpoints.HTMLViewPage;
 import org.rapla.storage.StorageOperator;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.core.subst.Token.Type;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -43,19 +53,27 @@ import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -77,7 +95,7 @@ import java.util.TreeSet;
 * &year=<year>:  int-value of the year
 * &today:  will set the view to the current day. Ignores day, month and year
 */
-@Path("{path:calendar|calendar.csv|internal_calendar|internal_calendar.csv}")
+@Path("{path:availability|availability.csv|internal_availability|internal_availability.csv}")
 @Singleton
 public class AvailabilityPageGenerator
 {
@@ -98,6 +116,10 @@ public class AvailabilityPageGenerator
    public AvailabilityPageGenerator()
    {
    }
+
+   private static final int MAX_AVAILABILITIES = 100;
+   private static final List<Availabilities> availabilityList = new ArrayList<>();
+   private static final Gson gson = new Gson(); // JSON-Handler
 
    public RaplaFacade getFacade() {
        return facade;
@@ -252,12 +274,12 @@ public class AvailabilityPageGenerator
 
    @NotNull
    protected String getBaseUrl(HttpServletRequest request) {
-       return AbstractHTMLCalendarPage.getUrl(request, getBasePath());
+       return availabilityWebpage.getUrl(request, getBasePath()); // change: availabilityWebpage instead of AbstractHTMLCalendarPage, Goal: Page generator uses plugin files to generate the Webpage
    }
 
    @NotNull
    protected String getBasePath() {
-       return "rapla/calendar";
+       return "rapla/availability"; //change: laut ChatGPT "rapla/availability/dozent/" + dozentId;
    }
 
    @GET
@@ -361,7 +383,7 @@ public class AvailabilityPageGenerator
                return;
            }
 
-           final String viewId = model.getViewId();
+           final String viewId = "availabilityWebsite"; //change: model.getViewId()
            final Provider<HTMLViewPage> htmlViewPageProvider = factoryMap.get(viewId);
 
            if (htmlViewPageProvider != null)
@@ -407,6 +429,59 @@ public class AvailabilityPageGenerator
        }
 
    }
+   
+   //Variante 1: Method to receive Data and to save it -> JSON
+   /*@POST
+   @Consumes(MediaType.APPLICATION_JSON) // JSON wird erwartet
+   @Produces(MediaType.TEXT_PLAIN)
+   public Response handleAvailability(String jsonData) {
+       logger.info("Request erhalten für handleAvailability");
+
+       if (jsonData == null || jsonData.isEmpty()) {
+           logger.warn("Keine Verfügbarkeiten erhalten!");
+           return Response.status(Response.Status.BAD_REQUEST).entity("Keine Verfügbarkeiten erhalten!").build();
+       }
+
+       try {
+           // JSON in eine Liste von Availabilities-Objekten umwandeln
+           java.lang.reflect.Type listType = new TypeToken<List<Availabilities>>() {}.getType();
+           List<Availabilities> availabilities = gson.fromJson(jsonData, listType);
+           
+           if (availabilities == null || availabilities.isEmpty()) {
+               logger.warn("Ungültige oder leere JSON-Daten erhalten!");
+               return Response.status(Response.Status.BAD_REQUEST).entity("Ungültige oder leere JSON-Daten!").build();
+           }
+
+           // Verfügbarkeiten in die Liste speichern
+           availabilityList.addAll(availabilities);
+
+           // Debug-Ausgabe im Server-Log
+           for (Availabilities a : availabilities) {
+               logger.info("Empfangen: " + a.getDate() + " von " + a.getStarttime() + " bis " + a.getEndtime());
+           }
+           
+           logger.info("Gesamte JSON-Daten: " + jsonData);
+           return Response.ok("Verfügbarkeiten wurden gespeichert!").build();
+       } catch (Exception e) {
+           return Response.status(Response.Status.BAD_REQUEST).entity("Fehler beim Verarbeiten der JSON-Daten: " + e.getMessage()).build();
+       }
+   }*/
+   //Variante 2: Method to receive Data and to save it -> String
+   @POST
+   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+   @Produces(MediaType.TEXT_PLAIN)
+   public Response handleAvailability(
+       @FormParam("firstname") String firstname,
+       @FormParam("lastname") String lastname,
+       @FormParam("date") String date,
+       @FormParam("day") String day) {
+
+       System.out.println("Empfangene Daten: " + firstname + " " + lastname + " am " + date + " (" + day + ")");
+
+       return Response.ok("Verfügbarkeit gespeichert!").build();
+   }
+
+
 /*
    @GET
    //@Produces("text/html;charset=ISO-8859-1")

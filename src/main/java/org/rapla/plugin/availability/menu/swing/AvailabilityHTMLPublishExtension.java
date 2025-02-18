@@ -1,6 +1,7 @@
 package org.rapla.plugin.availability.menu.swing;
 
 import org.rapla.RaplaResources;
+
 import org.rapla.client.swing.PublishExtension;
 import org.rapla.client.swing.RaplaGUIComponent;
 import org.rapla.client.swing.images.RaplaImages;

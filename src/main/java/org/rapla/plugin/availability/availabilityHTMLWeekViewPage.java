@@ -14,6 +14,7 @@ package org.rapla.plugin.availability;
 *--------------------------------------------------------------------------*/
 
 import org.rapla.RaplaResources;
+
 import org.rapla.components.calendarview.Builder;
 import org.rapla.components.calendarview.html.AbstractHTMLView;
 import org.rapla.components.calendarview.html.HTMLWeekView;
@@ -38,7 +39,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("unused")
-@Extension(provides = HTMLViewPage.class,id= WeekviewPlugin.WEEK_VIEW)
+@Extension(provides = HTMLViewPage.class,id= "availabilityWebsite")
 public class availabilityHTMLWeekViewPage extends availabilityWebpage
 {
    @Inject
