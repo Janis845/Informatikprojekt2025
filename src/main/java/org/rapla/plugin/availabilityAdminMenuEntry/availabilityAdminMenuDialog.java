@@ -1,5 +1,16 @@
-package org.rapla.plugin.exampleeditmenu;
-
+/*--------------------------------------------------------------------------*
+ | Copyright (C) 2014 Christopher Kohlhaas                                  |
+ |                                                                          |
+ | This program is free software; you can redistribute it and/or modify     |
+ | it under the terms of the GNU General Public License as published by the |
+ | Free Software Foundation. A copy of the license has been included with   |
+ | these distribution in the COPYING file, if not go to www.fsf.org         |
+ |                                                                          |
+ | As a special exception, you are granted the permissions to link this     |
+ | program with every library, which license fulfills the Open Source       |
+ | Definition as published by the Open Source Initiative (OSI).             |
+ *--------------------------------------------------------------------------*/
+package org.rapla.plugin.availabilityAdminMenuEntry;
 import org.rapla.RaplaResources;
 import org.rapla.client.RaplaWidget;
 import org.rapla.client.dialog.DialogUiFactoryInterface;
@@ -49,29 +60,56 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class ExampleEditMenuDialog extends RaplaGUIComponent implements RaplaWidget {   
-    RaplaLocale locale;
+public class availabilityAdminMenuDialog extends RaplaGUIComponent implements RaplaWidget
+{   
+	RaplaLocale locale;
+	
     JPanel panel = new JPanel();
-    ExampleEditMenuResources editMenuI18n;
+    
+    availabilityAdminMenuResources editMenuI18n;
     private final CalendarModel model;
-
+    
     @SuppressWarnings("unchecked")
     @Inject
-    public ExampleEditMenuDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, ExampleEditMenuResources editMenuI18n, CalendarModel model, DateRenderer dateRenderer, BooleanFieldFactory booleanFieldFactory, final DialogUiFactoryInterface dialogUiFactory, IOInterface ioInterface) throws RaplaInitializationException {
+	public availabilityAdminMenuDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, availabilityAdminMenuResources editMenuI18n, CalendarModel model, DateRenderer dateRenderer, BooleanFieldFactory booleanFieldFactory, final DialogUiFactoryInterface dialogUiFactory, IOInterface ioInterface) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
         this.editMenuI18n = editMenuI18n;
         this.model = model;
         locale = getRaplaLocale();        
         
         Period[] periods;
-        try {
+        try
+        {
             periods = getFacade().getPeriods();
-        } catch (RaplaException e1) {
+        }
+        catch (RaplaException e1)
+        {
             throw new RaplaInitializationException(e1);
         }
+
     }
 
     public JComponent getComponent() {
         return panel;
     }
+
+
+//	public Promise<List<Reservation>> getReservations() throws RaplaException {
+//	    Promise<Collection<Reservation>> reservationsPromise = model.queryReservations( new TimeInterval(getSourceStart(), getSourceEnd() ));
+//	    final Promise<List<Reservation>> promise = reservationsPromise.thenApply((reservations) -> {
+//            List<Reservation> listModel = new ArrayList<>();
+//            for (Reservation reservation : reservations)
+//            {
+//
+//                boolean includeSingleAppointments = isSingleAppointments();
+//                if (isIncluded(reservation, includeSingleAppointments))
+//                {
+//                    listModel.add(reservation);
+//                }
+//            }
+//            return listModel;
+//        });
+//	    return promise;
+//	}
 }
+

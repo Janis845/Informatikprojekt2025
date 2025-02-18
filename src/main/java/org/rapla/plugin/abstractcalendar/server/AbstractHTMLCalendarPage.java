@@ -13,6 +13,7 @@
 package org.rapla.plugin.abstractcalendar.server;
 
 import org.rapla.RaplaResources;
+
 import org.rapla.components.calendarview.html.AbstractHTMLView;
 import org.rapla.components.i18n.I18nBundle;
 import org.rapla.components.util.DateTools;
@@ -464,7 +465,7 @@ public abstract class AbstractHTMLCalendarPage  implements HTMLViewPage
 
 
 
-    String getHiddenField( String fieldname, String value) {
+    protected String getHiddenField( String fieldname, String value) {
         // prevent against css attacks
     	value = encodeSafe(value);
         return "<input type=\"hidden\" name=\"" + fieldname + "\" value=\"" + value + "\"/>";
