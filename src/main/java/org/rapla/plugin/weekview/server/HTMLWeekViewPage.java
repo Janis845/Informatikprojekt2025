@@ -27,7 +27,6 @@ import org.rapla.logger.Logger;
 import org.rapla.plugin.abstractcalendar.GroupAllocatablesStrategy;
 import org.rapla.plugin.abstractcalendar.RaplaBuilder;
 import org.rapla.plugin.abstractcalendar.server.AbstractHTMLCalendarPage;
-import org.rapla.plugin.availability.availabilityHTMLWeekViewPage;
 import org.rapla.plugin.weekview.WeekviewPlugin;
 import org.rapla.server.extensionpoints.HTMLViewPage;
 
@@ -37,7 +36,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Extension(provides = HTMLViewPage.class,id= WeekviewPlugin.WEEK_VIEW)
-public class HTMLWeekViewPage extends availabilityHTMLWeekViewPage
+public class HTMLWeekViewPage extends AbstractHTMLCalendarPage
 {
     @Inject
     public HTMLWeekViewPage(RaplaLocale raplaLocale, RaplaResources raplaResources, RaplaFacade facade, Logger logger, AppointmentFormater appointmentFormater)

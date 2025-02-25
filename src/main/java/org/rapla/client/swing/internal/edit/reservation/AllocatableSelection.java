@@ -1295,6 +1295,16 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             }
             if (conflictingAppointments)
             {
+            	//cambiar
+            	// TODO Availability
+            	// Hier werden die Konflikte ermittelt. Unser neuer Verfügbarkeitsklassentyp müsste berücksichtigt werden.
+            	// Übergeordnete Veranstaltung des Termins 'appointment'
+            	Reservation reservation = appointment.getReservation(); 
+            	// Der Type der Veranstaltung
+            	DynamicType type = reservation.getClassification().getType();
+            	// Die Typenklasse, also resource, reservation, person und (neu bei uns) availability
+            	String classificationtype = type.getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
+            	
                 if (!holdBackConflicts)
                 {
                     result.conflictingAppointments[i] = true;
@@ -2020,6 +2030,10 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
 
         private Icon getIcon(Allocatable allocatable)
         {
+        	//cambiar
+        	// TODO Availability
+        	// Hier wird das Icon festgelegt, das bei den Veranstaltungen auf Konflikte hinweist.
+        	
             Date today = getQuery().today();
 
             AllocationRendering allocBinding = calcConflictingAppointments(allocatable);
