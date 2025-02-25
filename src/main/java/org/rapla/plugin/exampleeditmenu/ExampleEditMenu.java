@@ -16,6 +16,7 @@ import org.rapla.RaplaResources;
 import org.rapla.client.PopupContext;
 import org.rapla.client.dialog.DialogInterface;
 import org.rapla.client.dialog.DialogUiFactoryInterface;
+import org.rapla.client.extensionpoints.AdminMenuExtension;
 import org.rapla.client.extensionpoints.EditMenuExtension;
 import org.rapla.client.internal.SaveUndo;
 import org.rapla.client.swing.RaplaGUIComponent;
@@ -50,8 +51,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Extension(provides = EditMenuExtension.class,id=ExampleEditMenu.PLUGIN_ID)
-public class ExampleEditMenu  extends RaplaGUIComponent implements EditMenuExtension, ActionListener
+@Extension(provides = AdminMenuExtension.class,id=ExampleEditMenu.PLUGIN_ID)
+public class ExampleEditMenu  extends RaplaGUIComponent implements AdminMenuExtension, ActionListener
 {
 	public static final String PLUGIN_ID ="org.rapla.plugin.exampleeditmenu";
 	
