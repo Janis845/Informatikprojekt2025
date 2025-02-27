@@ -14,7 +14,7 @@ import org.rapla.plugin.availability.AvailabilityResources;
 
 import javax.inject.Inject;
 import java.beans.PropertyChangeListener;
-
+//Datei kann  zum Schluss gelöscht werden. Aktuell nur für Verständnis und zum Code kopieren
 @Extension(provides=PublishExtensionFactory.class,id="availabilityHTML")
 public class AvailabilityHTMLPublicExtensionFactory implements PublishExtensionFactory
 {

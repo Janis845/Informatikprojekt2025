@@ -21,7 +21,7 @@ import org.rapla.plugin.availability.menu.AvailabilityPlugin;
 
 import javax.swing.*;
 import java.awt.*;
-
+//Datei kann  zum Schluss gelöscht werden. Aktuell nur für Verständnis und zum Code kopieren
 public class AvailabilityHTMLPublishExtension extends RaplaGUIComponent implements PublishExtension
 {
 	 JPanel panel = new JPanel();

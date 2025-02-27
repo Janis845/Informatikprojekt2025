@@ -95,7 +95,7 @@ import java.util.TreeSet;
 * &year=<year>:  int-value of the year
 * &today:  will set the view to the current day. Ignores day, month and year
 */
-@Path("{path:availability|availability.csv|internal_availability|internal_availability.csv}")
+@Path("availability")
 @Singleton
 public class AvailabilityPageGenerator
 {
@@ -161,111 +161,111 @@ public class AvailabilityPageGenerator
        }
    }
 
-   private void generatePageList(User[] users,  HttpServletRequest request, HttpServletResponse response)
-           throws IOException, ServletException
-   {
-       java.io.PrintWriter out = response.getWriter();
-       try
-       {
-           response.setContentType("text/html; charset=" + raplaLocale.getCharsetNonUtf());
-
-           SortedSet<User> sortedUsers = new TreeSet<>(User.USER_COMPARATOR);
-           sortedUsers.addAll(Arrays.asList(users));
-
-           String calendarName = facade.getSystemPreferences().getEntryAsString(AbstractRaplaLocale.TITLE, i18n.getString("rapla.title"));
-           out.println("<html>");
-           out.println("<head>");
-           out.println("<title>" + calendarName + "</title>");
-           String charset = raplaLocale.getCharsetNonUtf();//
-           out.println("  <meta HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset=" + charset + "\">");
-           out.println("</head>");
-           out.println("<body>");
-
-           out.println("<h2>" + autoexportI18n.getString("webserver") + ": " + calendarName + "</h2>");
-
-           for (User user : sortedUsers)
-           {
-               Preferences preferences = facade.getPreferences(user);
-               LinkedHashMap<String, CalendarModelConfiguration> completeMap = new LinkedHashMap<>();
-               CalendarModelConfiguration defaultConf = preferences.getEntry(CalendarModelConfiguration.CONFIG_ENTRY);
-               if (defaultConf != null)
-               {
-                   if (!isEncrypted( defaultConf)) {
-                       completeMap.put("", defaultConf);
-                   }
-               }
-
-               final RaplaMap<CalendarModelConfiguration> raplaMap = preferences.getEntry(AvailabilityPlugin.PLUGIN_ENTRY);
-               if (raplaMap != null)
-               {
-                   for (Map.Entry<String, CalendarModelConfiguration> entry : raplaMap.entrySet())
-                   {
-                       CalendarModelConfiguration value = entry.getValue();
-                       if (!isEncrypted( value ) ) {
-                           completeMap.put(entry.getKey(), value);
-                       }
-                   }
-               }
-               SortedMap<String, CalendarModelConfiguration> sortedMap = new TreeMap<>(new TitleComparator(completeMap));
-               sortedMap.putAll(completeMap);
-               Iterator<Map.Entry<String, CalendarModelConfiguration>> it = sortedMap.entrySet().iterator();
-
-               int count = 0;
-               while (it.hasNext())
-               {
-                   Map.Entry<String, CalendarModelConfiguration> entry = it.next();
-                   String key = entry.getKey();
-                   CalendarModelConfiguration conf = entry.getValue();
-                   final Object isSet = conf.getOptionMap().get(AvailabilityPlugin.HTML_EXPORT);
-                   if (isSet != null && isSet.equals("false"))
-                   {
-                       it.remove();
-                       continue;
-                   }
-                   if (count == 0)
-                   {
-                       String userName = user.getName();
-                       if (userName == null || userName.trim().length() == 0)
-                           userName = user.getUsername();
-                       out.println("<h3>" + userName + "</h3>"); //BJO
-                       out.println("<ul>");
-                   }
-                   count++;
-                   String title = getTitle(key, conf);
-
-                   String filename = URLEncoder.encode(key, "UTF-8");
-                   out.print("<li>");
-                   String baseUrl = getBaseUrl(request);
-
-                   String link = baseUrl+"?user=" + user.getUsername();
-                   if ( filename != null && !filename.isEmpty()) {
-                       link += "&file=" + filename;
-                   }
-                   link+="&details=*";
-                   link+= "&folder=true";
-                   out.print("<a href=\"" + link + "\">");
-                   out.print(title);
-                   out.print("</a>");
-                   out.println("</li>");
-               }
-               if (count > 0)
-               {
-                   out.println("</ul>");
-               }
-           }
-           out.println("</body>");
-           out.println("</html>");
-       }
-       catch (Exception ex)
-       {
-           out.println(IOUtil.getStackTraceAsString(ex));
-           throw new ServletException(ex);
-       }
-       finally
-       {
-           out.close();
-       }
-   }
+//   private void generatePageList(User[] users,  HttpServletRequest request, HttpServletResponse response)
+//           throws IOException, ServletException
+//   {
+//       java.io.PrintWriter out = response.getWriter();
+//       try
+//       {
+//           response.setContentType("text/html; charset=" + raplaLocale.getCharsetNonUtf());
+//
+//           SortedSet<User> sortedUsers = new TreeSet<>(User.USER_COMPARATOR);
+//           sortedUsers.addAll(Arrays.asList(users));
+//
+//           String calendarName = facade.getSystemPreferences().getEntryAsString(AbstractRaplaLocale.TITLE, i18n.getString("rapla.title"));
+//           out.println("<html>");
+//           out.println("<head>");
+//           out.println("<title>" + calendarName + "</title>");
+//           String charset = raplaLocale.getCharsetNonUtf();//
+//           out.println("  <meta HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset=" + charset + "\">");
+//           out.println("</head>");
+//           out.println("<body>");
+//
+//           out.println("<h2>" + autoexportI18n.getString("webserver") + ": " + calendarName + "</h2>");
+//
+//           for (User user : sortedUsers)
+//           {
+//               Preferences preferences = facade.getPreferences(user);
+//               LinkedHashMap<String, CalendarModelConfiguration> completeMap = new LinkedHashMap<>();
+//               CalendarModelConfiguration defaultConf = preferences.getEntry(CalendarModelConfiguration.CONFIG_ENTRY);
+//               if (defaultConf != null)
+//               {
+//                   if (!isEncrypted( defaultConf)) {
+//                       completeMap.put("", defaultConf);
+//                   }
+//               }
+//
+//               final RaplaMap<CalendarModelConfiguration> raplaMap = preferences.getEntry(AvailabilityPlugin.PLUGIN_ENTRY);
+//               if (raplaMap != null)
+//               {
+//                   for (Map.Entry<String, CalendarModelConfiguration> entry : raplaMap.entrySet())
+//                   {
+//                       CalendarModelConfiguration value = entry.getValue();
+//                       if (!isEncrypted( value ) ) {
+//                           completeMap.put(entry.getKey(), value);
+//                       }
+//                   }
+//               }
+//               SortedMap<String, CalendarModelConfiguration> sortedMap = new TreeMap<>(new TitleComparator(completeMap));
+//               sortedMap.putAll(completeMap);
+//               Iterator<Map.Entry<String, CalendarModelConfiguration>> it = sortedMap.entrySet().iterator();
+//
+//               int count = 0;
+//               while (it.hasNext())
+//               {
+//                   Map.Entry<String, CalendarModelConfiguration> entry = it.next();
+//                   String key = entry.getKey();
+//                   CalendarModelConfiguration conf = entry.getValue();
+//                   final Object isSet = conf.getOptionMap().get(AvailabilityPlugin.HTML_EXPORT);
+//                   if (isSet != null && isSet.equals("false"))
+//                   {
+//                       it.remove();
+//                       continue;
+//                   }
+//                   if (count == 0)
+//                   {
+//                       String userName = user.getName();
+//                       if (userName == null || userName.trim().length() == 0)
+//                           userName = user.getUsername();
+//                       out.println("<h3>" + userName + "</h3>"); //BJO
+//                       out.println("<ul>");
+//                   }
+//                   count++;
+//                   String title = getTitle(key, conf);
+//
+//                   String filename = URLEncoder.encode(key, "UTF-8");
+//                   out.print("<li>");
+//                   String baseUrl = getBaseUrl(request);
+//
+//                   String link = baseUrl+"?user=" + user.getUsername();
+//                   if ( filename != null && !filename.isEmpty()) {
+//                       link += "&file=" + filename;
+//                   }
+//                   link+="&details=*";
+//                   link+= "&folder=true";
+//                   out.print("<a href=\"" + link + "\">");
+//                   out.print(title);
+//                   out.print("</a>");
+//                   out.println("</li>");
+//               }
+//               if (count > 0)
+//               {
+//                   out.println("</ul>");
+//               }
+//           }
+//           out.println("</body>");
+//           out.println("</html>");
+//       }
+//       catch (Exception ex)
+//       {
+//           out.println(IOUtil.getStackTraceAsString(ex));
+//           throw new ServletException(ex);
+//       }
+//       finally
+//       {
+//           out.close();
+//       }
+//   }
 
    private boolean isEncrypted(CalendarModelConfiguration conf) {
        String encyrptionSelected = conf.getOptionMap().get(UrlEncryptionPlugin.URL_ENCRYPTION);
@@ -284,43 +284,45 @@ public class AvailabilityPageGenerator
 
    @GET
    //@Produces("text/html;charset=ISO-8859-1")
+   @Path("{id}")
    @Produces({"text/html;UTF-8","text/calendar;UTF-8"})
-   public void generatePage(@PathParam("path")  String path, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, ServletException
+   public void generatePage(@PathParam("id")  String path, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, ServletException
    {
        StorageOperator operator = getFacade().getOperator();
        Map<String, Object> threadContextMap = operator.getThreadContextMap();
        try
        {
-           if ( path.startsWith("internal")) {
+           if ( path.startsWith("availability")) {
                threadContextMap.put("internal_request", Boolean.TRUE);
            }
-           String username = request.getParameter("user");
-           if (username == null)
-           {
-               User[] users;
-               // TODO add special param if you want to request the calendar lists for a user
-               if (username != null)
-               {
-                   users = new User[] { facade.getUser(username) };
-               }
-               else
-               {
-                   users = facade.getUsers();
-               }
-               final Boolean entryAsBoolean = facade.getSystemPreferences().getEntryAsBoolean(AvailabilityPlugin.SHOW_CALENDAR_LIST_IN_HTML_MENU, false);
-               if ( entryAsBoolean)
-               {
-                   generatePageList(users, request, response);
-               }
-               else
-               {
-                   java.io.PrintWriter out = response.getWriter();
-                   response.setStatus( 404);
-                   out.println("Calender menu disabled. You used the wrong url.");
-                   out.close();
-               }
-               return;
-           }
+           String username = "admin" ; //wird das benötigt?
+           //String username = request.getParameter("user");
+//           if (username == null) //wird aufgerfrufen wenn user=... leer bleibt
+//           {
+//               User[] users;
+//               // TODO add special param if you want to request the calendar lists for a user
+//               if (username != null)
+//               {
+//                   users = new User[] { facade.getUser(username) };
+//               }
+//               else
+//               {
+//                   users = facade.getUsers();
+//               }
+//               final Boolean entryAsBoolean = facade.getSystemPreferences().getEntryAsBoolean(AvailabilityPlugin.SHOW_CALENDAR_LIST_IN_HTML_MENU, false);
+//               if ( entryAsBoolean)
+//               {
+//                   generatePageList(users, request, response);
+//               }
+//               else
+//               {
+//                   java.io.PrintWriter out = response.getWriter();
+//                   response.setStatus( 404);
+//                   out.println("Calender menu disabled. You used the wrong url.");
+//                   out.close();
+//               }
+//               return;
+//           }
            String filename = request.getParameter("file");
 
            CalendarSelectionModel model = null;
@@ -375,7 +377,7 @@ public class AvailabilityPageGenerator
                    return;
                }
            }
-           final Object isSet = model.getOption(AvailabilityPlugin.HTML_EXPORT);
+           final Object isSet = model.getOption(AvailabilityPlugin.HTML_EXPORT); //Website ein/ausschalten
            if (isSet == null || isSet.equals("false"))
            {
                String message = "404 Calendar not published " + username + "/" + filename;
@@ -431,7 +433,7 @@ public class AvailabilityPageGenerator
    }
    
    //Variante 1: Method to receive Data and to save it -> JSON
-   /*@POST
+   @POST
    @Consumes(MediaType.APPLICATION_JSON) // JSON wird erwartet
    @Produces(MediaType.TEXT_PLAIN)
    public Response handleAvailability(String jsonData) {
@@ -465,9 +467,9 @@ public class AvailabilityPageGenerator
        } catch (Exception e) {
            return Response.status(Response.Status.BAD_REQUEST).entity("Fehler beim Verarbeiten der JSON-Daten: " + e.getMessage()).build();
        }
-   }*/
+   }
    //Variante 2: Method to receive Data and to save it -> String
-   @POST
+   /*@POST
    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
    @Produces(MediaType.TEXT_PLAIN)
    public Response handleAvailability(
@@ -477,7 +479,7 @@ public class AvailabilityPageGenerator
        @FormParam("day") String day) {
 
        System.out.println("Empfangene Daten: " + firstname + " " + lastname + " am " + date + " (" + day + ")");
-
+       
        return Response.ok("Verfügbarkeit gespeichert!").build();
    }
 
