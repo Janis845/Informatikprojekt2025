@@ -16,8 +16,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -100,6 +98,10 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
                 String generatedUrl = "http://example.com/availability?raplaId=" + enteredId;
                 urlField.setText(generatedUrl);
                 generatedUrls.put(generatedUrl, name);  // URL mit zugehörigem Namen speichern
+                
+                // Eingabefelder nach erfolgreicher Generierung leeren
+                nameField.setText("");
+                raplaIdField.setText("");
             }
         });
         
@@ -108,6 +110,9 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             if (!url.isEmpty()) {
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(url), null);
                 JOptionPane.showMessageDialog(panel, "URL wurde in die Zwischenablage kopiert!", "Erfolg", JOptionPane.INFORMATION_MESSAGE);
+                
+                // Nach dem Kopieren das URL-Feld leeren
+                urlField.setText("");
             } else {
                 JOptionPane.showMessageDialog(panel, "Keine URL zum Kopieren vorhanden!", "Fehler", JOptionPane.ERROR_MESSAGE);
             }

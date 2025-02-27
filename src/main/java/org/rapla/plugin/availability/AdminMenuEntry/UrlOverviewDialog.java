@@ -36,8 +36,17 @@ public class UrlOverviewDialog implements RaplaWidget {
         urlPanel = new JPanel();
         urlPanel.setLayout(new BoxLayout(urlPanel, BoxLayout.Y_AXIS));
 
-        // URLs mit Namen anzeigen
-        for (Map.Entry<String, String> entry : urlNameMap.entrySet()) {
+        updateUrlList();
+
+        JScrollPane scrollPane = new JScrollPane(urlPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void updateUrlList() {
+        urlPanel.removeAll();
+
+        for (Map.Entry<String, String> entry : new HashMap<>(urlNameMap).entrySet()) {
             String url = entry.getKey();
             String name = entry.getValue();
 
@@ -61,17 +70,25 @@ public class UrlOverviewDialog implements RaplaWidget {
                 JOptionPane.showMessageDialog(panel, "URL wurde in die Zwischenablage kopiert!", "Erfolg", JOptionPane.INFORMATION_MESSAGE);
             });
 
+            JButton deleteButton = new JButton("Löschen");
+            deleteButton.addActionListener(e -> {
+                urlNameMap.remove(url);
+                urlStatusMap.remove(url);
+                updateUrlList();
+                panel.revalidate();
+                panel.repaint();
+            });
+
             urlEntryPanel.add(nameLabel);
             urlEntryPanel.add(urlField);
             urlEntryPanel.add(toggleButton);
             urlEntryPanel.add(copyButton);
+            urlEntryPanel.add(deleteButton);
 
             urlPanel.add(urlEntryPanel);
         }
-
-        JScrollPane scrollPane = new JScrollPane(urlPanel);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(scrollPane, BorderLayout.CENTER);
+        urlPanel.revalidate();
+        urlPanel.repaint();
     }
 
     @Override
