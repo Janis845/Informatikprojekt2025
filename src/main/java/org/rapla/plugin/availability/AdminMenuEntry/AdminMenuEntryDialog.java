@@ -1,116 +1,121 @@
-/*--------------------------------------------------------------------------*
- | Copyright (C) 2014 Christopher Kohlhaas                                  |
- |                                                                          |
- | This program is free software; you can redistribute it and/or modify     |
- | it under the terms of the GNU General Public License as published by the |
- | Free Software Foundation. A copy of the license has been included with   |
- | these distribution in the COPYING file, if not go to www.fsf.org         |
- |                                                                          |
- | As a special exception, you are granted the permissions to link this     |
- | program with every library, which license fulfills the Open Source       |
- | Definition as published by the Open Source Initiative (OSI).             |
- *--------------------------------------------------------------------------*/
 package org.rapla.plugin.availability.AdminMenuEntry;
 
 import org.rapla.RaplaResources;
 import org.rapla.client.RaplaWidget;
-import org.rapla.client.dialog.DialogUiFactoryInterface;
 import org.rapla.client.swing.RaplaGUIComponent;
 import org.rapla.client.swing.internal.SwingPopupContext;
-import org.rapla.client.swing.internal.common.NamedListCellRenderer;
-import org.rapla.client.swing.internal.edit.fields.BooleanField;
-import org.rapla.client.swing.internal.edit.fields.BooleanField.BooleanFieldFactory;
-import org.rapla.components.calendar.DateChangeEvent;
-import org.rapla.components.calendar.DateChangeListener;
-import org.rapla.components.calendar.DateRenderer;
-import org.rapla.components.calendar.RaplaCalendar;
-import org.rapla.components.iolayer.IOInterface;
-import org.rapla.components.layout.TableLayout;
-import org.rapla.components.util.TimeInterval;
-import org.rapla.entities.domain.Appointment;
-import org.rapla.entities.domain.Period;
-import org.rapla.entities.domain.Repeating;
-import org.rapla.entities.domain.Reservation;
-import org.rapla.entities.domain.internal.PeriodImpl;
-import org.rapla.facade.CalendarModel;
+import org.rapla.client.dialog.DialogUiFactoryInterface;
 import org.rapla.facade.client.ClientFacade;
 import org.rapla.framework.RaplaException;
 import org.rapla.framework.RaplaInitializationException;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.logger.Logger;
-import org.rapla.plugin.periodcopy.PeriodCopyResources;
-import org.rapla.scheduler.Promise;
 
 import javax.inject.Inject;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
-public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget
-{   
-	RaplaLocale locale;
-	
-    JPanel panel = new JPanel();
+public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget {
+
+    private JPanel panel;
+    private JTextField raplaIdField;
+    private JButton generateButton;
+    private JTextField urlField;
+    private JButton copyButton;
+    private JButton overviewButton;
+    private List<String> generatedUrls = new ArrayList<>();
     
-    AdminMenuEntryResources editMenuI18n;
-    private final CalendarModel model;
-    
-    @SuppressWarnings("unchecked")
     @Inject
-	public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, AdminMenuEntryResources editMenuI18n, CalendarModel model, DateRenderer dateRenderer, BooleanFieldFactory booleanFieldFactory, final DialogUiFactoryInterface dialogUiFactory, IOInterface ioInterface) throws RaplaInitializationException {
+    public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, DialogUiFactoryInterface dialogUiFactory) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
-        this.editMenuI18n = editMenuI18n;
-        this.model = model;
-        locale = getRaplaLocale();        
-        
-        Period[] periods;
-        try
-        {
-            periods = getFacade().getPeriods();
-        }
-        catch (RaplaException e1)
-        {
-            throw new RaplaInitializationException(e1);
-        }
-
+        initUI();
     }
+    
+    private void initUI() {
+        panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        JLabel label = new JLabel("Rapla-ID eingeben:");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(label, gbc);
+        
+        raplaIdField = new JTextField(20);
+        gbc.gridx = 1;
+        panel.add(raplaIdField, gbc);
+        
+        generateButton = new JButton("Webseite generieren");
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        panel.add(generateButton, gbc);
+        
+        JLabel urlLabel = new JLabel("Generierte URL:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(urlLabel, gbc);
+        
+        urlField = new JTextField(30);
+        urlField.setEditable(false);
+        gbc.gridx = 1;
+        panel.add(urlField, gbc);
+        
+        copyButton = new JButton("Kopieren");
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        panel.add(copyButton, gbc);
+        
+        overviewButton = new JButton("URL Übersicht");
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        panel.add(overviewButton, gbc);
+        
+        generateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String enteredId = raplaIdField.getText();
+                if (enteredId.isEmpty()) {
+                    JOptionPane.showMessageDialog(panel, "Bitte eine Rapla-ID eingeben!", "Fehler", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    String generatedUrl = "http://example.com/availability?raplaId=" + enteredId;
+                    urlField.setText(generatedUrl);
+                    generatedUrls.add(generatedUrl);  // URL zur Liste hinzufügen
+                }
+            }
+        });
+        
+        copyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String url = urlField.getText();
+                if (!url.isEmpty()) {
+                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(url), null);
+                    JOptionPane.showMessageDialog(panel, "URL wurde in die Zwischenablage kopiert!", "Erfolg", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(panel, "Keine URL zum Kopieren vorhanden!", "Fehler", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
+        overviewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                UrlOverviewDialog overviewDialog = new UrlOverviewDialog(generatedUrls);
+                JOptionPane.showMessageDialog(panel, overviewDialog.getComponent(), "URL Übersicht", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }
+    
+    @Override
     public JComponent getComponent() {
         return panel;
     }
-
-
-//	public Promise<List<Reservation>> getReservations() throws RaplaException {
-//	    Promise<Collection<Reservation>> reservationsPromise = model.queryReservations( new TimeInterval(getSourceStart(), getSourceEnd() ));
-//	    final Promise<List<Reservation>> promise = reservationsPromise.thenApply((reservations) -> {
-//            List<Reservation> listModel = new ArrayList<>();
-//            for (Reservation reservation : reservations)
-//            {
-//
-//                boolean includeSingleAppointments = isSingleAppointments();
-//                if (isIncluded(reservation, includeSingleAppointments))
-//                {
-//                    listModel.add(reservation);
-//                }
-//            }
-//            return listModel;
-//        });
-//	    return promise;
-//	}
 }
-
