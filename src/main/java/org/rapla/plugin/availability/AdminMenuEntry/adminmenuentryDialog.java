@@ -16,8 +16,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,10 +29,12 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
     private JButton copyButton;
     private JButton overviewButton;
     private Map<String, String> generatedUrls = new HashMap<>();
+    private UrlOverviewDialog overviewDialog;
     
     @Inject
     public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, DialogUiFactoryInterface dialogUiFactory) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
+        overviewDialog = new UrlOverviewDialog(generatedUrls);
         initUI();
     }
     
@@ -97,9 +97,8 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             } else {
                 String generatedUrl = "http://example.com/availability?raplaId=" + enteredId;
                 urlField.setText(generatedUrl);
-                generatedUrls.put(generatedUrl, name);  // URL mit zugehörigem Namen speichern
-                
-                // Eingabefelder nach erfolgreicher Generierung leeren
+                generatedUrls.put(generatedUrl, name);
+                overviewDialog.updateUrls(generatedUrls);
                 nameField.setText("");
                 raplaIdField.setText("");
             }
@@ -110,8 +109,6 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             if (!url.isEmpty()) {
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(url), null);
                 JOptionPane.showMessageDialog(panel, "URL wurde in die Zwischenablage kopiert!", "Erfolg", JOptionPane.INFORMATION_MESSAGE);
-                
-                // Nach dem Kopieren das URL-Feld leeren
                 urlField.setText("");
             } else {
                 JOptionPane.showMessageDialog(panel, "Keine URL zum Kopieren vorhanden!", "Fehler", JOptionPane.ERROR_MESSAGE);
@@ -119,7 +116,6 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         });
 
         overviewButton.addActionListener(e -> {
-            UrlOverviewDialog overviewDialog = new UrlOverviewDialog(generatedUrls);
             JOptionPane.showMessageDialog(panel, overviewDialog.getComponent(), "URL Übersicht", JOptionPane.INFORMATION_MESSAGE);
         });
     }

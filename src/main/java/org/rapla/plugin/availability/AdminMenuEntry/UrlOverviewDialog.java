@@ -19,7 +19,7 @@ public class UrlOverviewDialog implements RaplaWidget {
         this.urlNameMap = new HashMap<>(urlNameMap);
         this.urlStatusMap = new HashMap<>();
         for (String url : urlNameMap.keySet()) {
-            urlStatusMap.put(url, true); // Standardmäßig alle URLs aktiv
+            urlStatusMap.put(url, true);
         }
         initUI();
     }
@@ -36,32 +36,29 @@ public class UrlOverviewDialog implements RaplaWidget {
         urlPanel = new JPanel();
         urlPanel.setLayout(new BoxLayout(urlPanel, BoxLayout.Y_AXIS));
 
-        updateUrlList();
+        refreshUrlList();
 
         JScrollPane scrollPane = new JScrollPane(urlPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.add(scrollPane, BorderLayout.CENTER);
     }
 
-    private void updateUrlList() {
+    private void refreshUrlList() {
         urlPanel.removeAll();
-
-        for (Map.Entry<String, String> entry : new HashMap<>(urlNameMap).entrySet()) {
+        for (Map.Entry<String, String> entry : urlNameMap.entrySet()) {
             String url = entry.getKey();
             String name = entry.getValue();
 
-            JPanel urlEntryPanel = new JPanel();
-            urlEntryPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+            JPanel urlEntryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             urlEntryPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
             JLabel nameLabel = new JLabel("Dozent: " + name + " ");
             JTextField urlField = new JTextField(url, 30);
             urlField.setEditable(false);
 
-            JCheckBox toggleButton = new JCheckBox("Aktiv", true);
+            JCheckBox toggleButton = new JCheckBox("Aktiv", urlStatusMap.getOrDefault(url, true));
             toggleButton.addActionListener(e -> {
                 urlStatusMap.put(url, toggleButton.isSelected());
-                JOptionPane.showMessageDialog(panel, "URL für " + name + " " + (toggleButton.isSelected() ? "aktiviert" : "deaktiviert"), "Status geändert", JOptionPane.INFORMATION_MESSAGE);
             });
 
             JButton copyButton = new JButton("Kopieren");
@@ -72,11 +69,14 @@ public class UrlOverviewDialog implements RaplaWidget {
 
             JButton deleteButton = new JButton("Löschen");
             deleteButton.addActionListener(e -> {
-                urlNameMap.remove(url);
-                urlStatusMap.remove(url);
-                updateUrlList();
-                panel.revalidate();
-                panel.repaint();
+                int confirm = JOptionPane.showConfirmDialog(panel, "Möchtest du diesen Eintrag wirklich löschen?", "Löschen bestätigen", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    urlNameMap.remove(url);
+                    urlStatusMap.remove(url);
+                    refreshUrlList();
+                    panel.revalidate();
+                    panel.repaint();
+                }
             });
 
             urlEntryPanel.add(nameLabel);
@@ -87,16 +87,17 @@ public class UrlOverviewDialog implements RaplaWidget {
 
             urlPanel.add(urlEntryPanel);
         }
-        urlPanel.revalidate();
-        urlPanel.repaint();
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    public void updateUrls(Map<String, String> newUrls) {
+        urlNameMap = new HashMap<>(newUrls);
+        refreshUrlList();
     }
 
     @Override
     public JComponent getComponent() {
         return panel;
-    }
-
-    public boolean isUrlActive(String url) {
-        return urlStatusMap.getOrDefault(url, false);
     }
 }
