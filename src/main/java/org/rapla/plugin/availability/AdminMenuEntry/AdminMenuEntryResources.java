@@ -15,7 +15,7 @@ public class AdminMenuEntryResources extends AbstractBundle
     public static final String BUNDLENAME = AdminMenuEntry.PLUGIN_ID + ".AdminMenuEntryResources";
 
     @Inject
-    public AdminMenuEntryResources( BundleManager bundleManager)
+    public AdminMenuEntryResources(BundleManager bundleManager)
     {
         super(BUNDLENAME, bundleManager);
     }
@@ -29,5 +29,4 @@ public class AdminMenuEntryResources extends AbstractBundle
     {
         return super.format(key, obj);
     }
-
 }
