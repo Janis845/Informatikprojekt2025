@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<urls>
+    <url>
+        <name>aaaaa</name>
+        <link>http://example.com/availability?raplaId=aaaaa</link>
+    </url>
+    <url>
+        <name>aaaaa</name>
+        <link>http://example.com/availability?raplaId=aaaaaa</link>
+    </url>
+    <url>
+        <name>20202</name>
+        <link>http://example.com/availability?raplaId=222</link>
+    </url>
+    <url>
+        <name>sssss</name>
+        <link>http://example.com/availability?raplaId=sssss</link>
+    </url>
+</urls>

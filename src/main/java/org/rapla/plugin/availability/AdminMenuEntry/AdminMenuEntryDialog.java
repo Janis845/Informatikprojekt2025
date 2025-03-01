@@ -3,10 +3,8 @@ package org.rapla.plugin.availability.AdminMenuEntry;
 import org.rapla.RaplaResources;
 import org.rapla.client.RaplaWidget;
 import org.rapla.client.swing.RaplaGUIComponent;
-import org.rapla.client.swing.internal.SwingPopupContext;
 import org.rapla.client.dialog.DialogUiFactoryInterface;
 import org.rapla.facade.client.ClientFacade;
-import org.rapla.framework.RaplaException;
 import org.rapla.framework.RaplaInitializationException;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.logger.Logger;
@@ -16,8 +14,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList; // <-- Hier ist der Import für NodeList
 
 public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget {
 
@@ -35,6 +44,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
     public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, DialogUiFactoryInterface dialogUiFactory) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
         overviewDialog = new UrlOverviewDialog(generatedUrls);
+        loadUrlsFromXml(); // URLs aus XML laden
         initUI();
     }
     
@@ -99,6 +109,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
                 urlField.setText(generatedUrl);
                 generatedUrls.put(generatedUrl, name);
                 overviewDialog.updateUrls(generatedUrls);
+                saveUrlsToXml(); // URLs in XML speichern
                 nameField.setText("");
                 raplaIdField.setText("");
             }
@@ -119,7 +130,67 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             JOptionPane.showMessageDialog(panel, overviewDialog.getComponent(), "URL Übersicht", JOptionPane.INFORMATION_MESSAGE);
         });
     }
-    
+
+    // Methode zum Speichern der URLs in einer XML-Datei
+    private void saveUrlsToXml() {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+
+            // Wurzel-Element
+            Element rootElement = doc.createElement("urls");
+            doc.appendChild(rootElement);
+
+            for (Map.Entry<String, String> entry : generatedUrls.entrySet()) {
+                Element urlElement = doc.createElement("url");
+                rootElement.appendChild(urlElement);
+
+                Element nameElement = doc.createElement("name");
+                nameElement.appendChild(doc.createTextNode(entry.getValue()));
+                urlElement.appendChild(nameElement);
+
+                Element linkElement = doc.createElement("link");
+                linkElement.appendChild(doc.createTextNode(entry.getKey()));
+                urlElement.appendChild(linkElement);
+            }
+
+            // Schreiben in die XML-Datei
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File("urls.xml"));
+            transformer.transform(source, result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Methode zum Laden der URLs aus einer XML-Datei
+    private void loadUrlsFromXml() {
+        try {
+            File xmlFile = new File("urls.xml");
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+            doc.getDocumentElement().normalize();
+
+            NodeList urlList = doc.getElementsByTagName("url");
+
+            for (int i = 0; i < urlList.getLength(); i++) {
+                Element urlElement = (Element) urlList.item(i);
+                String name = urlElement.getElementsByTagName("name").item(0).getTextContent();
+                String link = urlElement.getElementsByTagName("link").item(0).getTextContent();
+                generatedUrls.put(link, name);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public JComponent getComponent() {
         return panel;
