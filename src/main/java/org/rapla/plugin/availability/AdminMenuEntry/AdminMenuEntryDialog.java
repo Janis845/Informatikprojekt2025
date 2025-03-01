@@ -28,7 +28,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget<Object> {
+public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget {
 
     private JPanel panel;
     private JTextField nameField;
@@ -127,6 +127,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         });
 
         overviewButton.addActionListener(e -> {
+            overviewDialog.updateUrls(generatedUrls); // Aktualisiere die Übersicht mit den geladenen URLs
             JOptionPane.showMessageDialog(panel, overviewDialog.getComponent(), "URL Übersicht", JOptionPane.INFORMATION_MESSAGE);
         });
     }
