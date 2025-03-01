@@ -33,8 +33,28 @@
         <link>http://example.com/availability?raplaId=dasdsdas</link>
     </url>
     <url>
+        <name>Peter</name>
+        <link>http://localhost:8051/rapla/availability/1002</link>
+    </url>
+    <url>
+        <name>Uwe</name>
+        <link>http://localhost:8051/rapla/availability/1234</link>
+    </url>
+    <url>
+        <name>Döner</name>
+        <link>http://localhost:8051/rapla/availability/1003</link>
+    </url>
+    <url>
+        <name>Uwe</name>
+        <link>http://localhost:8051/rapla/availability/1000</link>
+    </url>
+    <url>
         <name>aaaaa</name>
         <link>http://example.com/availability?raplaId=aaaaa</link>
+    </url>
+    <url>
+        <name>Hans</name>
+        <link>http://localhost:8051/rapla/availability/1001</link>
     </url>
     <url>
         <name>aaaaa</name>
@@ -55,5 +75,9 @@
     <url>
         <name>20202</name>
         <link>http://example.com/availability?raplaId=222</link>
+    </url>
+    <url>
+        <name>Uwe</name>
+        <link>http://example.com/availability?raplaId=1234</link>
     </url>
 </urls>

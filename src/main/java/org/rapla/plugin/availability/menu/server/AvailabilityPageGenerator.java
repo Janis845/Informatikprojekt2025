@@ -35,6 +35,7 @@ import org.rapla.framework.internal.AbstractRaplaLocale;
 import org.rapla.logger.Logger;
 import org.rapla.plugin.availability.AvailabilityResources;
 import org.rapla.plugin.availability.availabilityWebpage;
+import org.rapla.plugin.availability.AdminMenuEntry.AdminMenuEntryDialog;
 import org.rapla.plugin.availability.menu.AvailabilityPlugin;
 import org.rapla.plugin.urlencryption.UrlEncryption;
 import org.rapla.plugin.urlencryption.UrlEncryptionPlugin;
@@ -71,6 +72,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -120,6 +122,7 @@ public class AvailabilityPageGenerator
    private static final int MAX_AVAILABILITIES = 100;
    private static final List<Availabilities> availabilityList = new ArrayList<>();
    private static final Gson gson = new Gson(); // JSON-Handler
+   private Map<String, String> generatedUrls = new HashMap<>();
 
    public RaplaFacade getFacade() {
        return facade;
@@ -290,39 +293,24 @@ public class AvailabilityPageGenerator
    {
        StorageOperator operator = getFacade().getOperator();
        Map<String, Object> threadContextMap = operator.getThreadContextMap();
+       try {
+       generatedUrls = AdminMenuEntryDialog.loadUrlsFromXmlinOtherClass();
+       }
+       catch (Exception ex){
+    	   System.out.println("Die gespeicherten URLs konnten nicht geladen werden");
+       }
        try
        {
-           if ( path.startsWith("availability")) {
-               threadContextMap.put("internal_request", Boolean.TRUE);
-           }
+           if (generatedUrls.containsKey(request.getRequestURL().toString())) {
+        	    System.out.println("Die URL ist in der Liste enthalten.");
+        	} else {
+        		System.out.println("Die URL ist nicht in der Liste enthalten.");
+        		String message = "404 Website not available";
+                write404(response, message);
+                return;
+        	}
+
            String username = "admin" ; //wird das benötigt?
-           //String username = request.getParameter("user");
-//           if (username == null) //wird aufgerfrufen wenn user=... leer bleibt
-//           {
-//               User[] users;
-//               // TODO add special param if you want to request the calendar lists for a user
-//               if (username != null)
-//               {
-//                   users = new User[] { facade.getUser(username) };
-//               }
-//               else
-//               {
-//                   users = facade.getUsers();
-//               }
-//               final Boolean entryAsBoolean = facade.getSystemPreferences().getEntryAsBoolean(AvailabilityPlugin.SHOW_CALENDAR_LIST_IN_HTML_MENU, false);
-//               if ( entryAsBoolean)
-//               {
-//                   generatePageList(users, request, response);
-//               }
-//               else
-//               {
-//                   java.io.PrintWriter out = response.getWriter();
-//                   response.setStatus( 404);
-//                   out.println("Calender menu disabled. You used the wrong url.");
-//                   out.close();
-//               }
-//               return;
-//           }
            String filename = request.getParameter("file");
 
            CalendarSelectionModel model = null;
@@ -376,13 +364,6 @@ public class AvailabilityPageGenerator
                    write404(response, message);
                    return;
                }
-           }
-           final Object isSet = model.getOption(AvailabilityPlugin.HTML_EXPORT); //Website ein/ausschalten
-           if (isSet == null || isSet.equals("false"))
-           {
-               String message = "404 Calendar not published " + username + "/" + filename;
-               write404(response, message);
-               return;
            }
 
            final String viewId = "availabilityWebsite"; //change: model.getViewId()

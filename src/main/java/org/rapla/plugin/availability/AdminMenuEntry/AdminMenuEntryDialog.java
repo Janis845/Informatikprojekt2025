@@ -105,7 +105,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             if (name.isEmpty() || enteredId.isEmpty()) {
                 JOptionPane.showMessageDialog(panel, "Bitte sowohl den Namen als auch die Rapla-ID eingeben!", "Fehler", JOptionPane.ERROR_MESSAGE);
             } else {
-                String generatedUrl = "http://example.com/availability?raplaId=" + enteredId;
+                String generatedUrl = "http://localhost:8051/rapla/availability/" + enteredId;
                 urlField.setText(generatedUrl);
                 generatedUrls.put(generatedUrl, name);
                 overviewDialog.updateUrls(generatedUrls);
@@ -191,6 +191,38 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             e.printStackTrace();
         }
     }
+    
+    //Methode zum Laden der URLs in einer anderen Klasse
+    public static Map<String, String> loadUrlsFromXmlinOtherClass() {
+        Map<String, String> generatedUrls = new HashMap<>();
+
+        try {
+            File xmlFile = new File("urls.xml");
+            if (!xmlFile.exists()) {
+                System.out.println("XML-Datei nicht gefunden!");
+                return generatedUrls;
+            }
+
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+            doc.getDocumentElement().normalize();
+
+            NodeList urlList = doc.getElementsByTagName("url");
+
+            for (int i = 0; i < urlList.getLength(); i++) {
+                Element urlElement = (Element) urlList.item(i);
+                String name = urlElement.getElementsByTagName("name").item(0).getTextContent();
+                String link = urlElement.getElementsByTagName("link").item(0).getTextContent();
+                generatedUrls.put(link, name);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return generatedUrls;
+    }
+
 
     @Override
     public JComponent getComponent() {
