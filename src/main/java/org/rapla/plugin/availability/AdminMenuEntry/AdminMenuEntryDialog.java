@@ -26,9 +26,9 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList; // <-- Hier ist der Import für NodeList
+import org.w3c.dom.NodeList;
 
-public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget {
+public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget<Object> {
 
     private JPanel panel;
     private JTextField nameField;
