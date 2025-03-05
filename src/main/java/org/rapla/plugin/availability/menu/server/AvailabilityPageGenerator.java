@@ -43,6 +43,7 @@ import org.rapla.server.extensionpoints.HTMLViewPage;
 import org.rapla.storage.StorageOperator;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import ch.qos.logback.classic.Level;
@@ -120,7 +121,7 @@ public class AvailabilityPageGenerator
    }
 
    private static final int MAX_AVAILABILITIES = 100;
-   private static final List<Availabilities> availabilityList = new ArrayList<>();
+   private static final List<Availability> availabilityList = new ArrayList<>();
    private static final Gson gson = new Gson(); // JSON-Handler
    private Map<String, String> generatedUrls = new HashMap<>();
 
@@ -415,40 +416,26 @@ public class AvailabilityPageGenerator
    
    //Variante 1: Method to receive Data and to save it -> JSON
    @POST
-   @Consumes(MediaType.APPLICATION_JSON) // JSON wird erwartet
-   @Produces(MediaType.TEXT_PLAIN)
-   public Response handleAvailability(String jsonData) {
-       logger.info("Request erhalten für handleAvailability");
-
-       if (jsonData == null || jsonData.isEmpty()) {
-           logger.warn("Keine Verfügbarkeiten erhalten!");
-           return Response.status(Response.Status.BAD_REQUEST).entity("Keine Verfügbarkeiten erhalten!").build();
-       }
-
+   @Consumes("application/json")
+   @Produces("text/plain")
+   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities) {
        try {
-           // JSON in eine Liste von Availabilities-Objekten umwandeln
-           java.lang.reflect.Type listType = new TypeToken<List<Availabilities>>() {}.getType();
-           List<Availabilities> availabilities = gson.fromJson(jsonData, listType);
-           
-           if (availabilities == null || availabilities.isEmpty()) {
-               logger.warn("Ungültige oder leere JSON-Daten erhalten!");
-               return Response.status(Response.Status.BAD_REQUEST).entity("Ungültige oder leere JSON-Daten!").build();
+           System.out.println("🚀 POST-Request empfangen!");
+
+           // Verfügbarkeiten durchlaufen und ausgeben
+           for (com.google.gson.internal.LinkedTreeMap availability : availabilities) {
+               System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
            }
 
-           // Verfügbarkeiten in die Liste speichern
-           availabilityList.addAll(availabilities);
+           return Response.ok("Erfolgreich empfangen").build();
 
-           // Debug-Ausgabe im Server-Log
-           for (Availabilities a : availabilities) {
-               logger.info("Empfangen: " + a.getDate() + " von " + a.getStarttime() + " bis " + a.getEndtime());
-           }
-           
-           logger.info("Gesamte JSON-Daten: " + jsonData);
-           return Response.ok("Verfügbarkeiten wurden gespeichert!").build();
        } catch (Exception e) {
-           return Response.status(Response.Status.BAD_REQUEST).entity("Fehler beim Verarbeiten der JSON-Daten: " + e.getMessage()).build();
+           e.printStackTrace();
+           return Response.status(Response.Status.BAD_REQUEST).entity("Invalid JSON format").build();
        }
    }
+
+
    //Variante 2: Method to receive Data and to save it -> String
    /*@POST
    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)

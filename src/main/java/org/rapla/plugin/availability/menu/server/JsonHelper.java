@@ -8,8 +8,8 @@ import java.util.List;
 public class JsonHelper {
     private static final Gson gson = new Gson();
 
-    public static List<Availabilities> convertJsonToAvailabilitiesList(String json) {
-        Type listType = new TypeToken<List<Availabilities>>() {}.getType();
+    public static List<Availability> convertJsonToAvailabilitiesList(String json) {
+        Type listType = new TypeToken<List<Availability>>() {}.getType();
         return gson.fromJson(json, listType);
     }
 }
