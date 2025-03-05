@@ -29,7 +29,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget {
-
     private JPanel panel;
     private JTextField nameField;
     private JTextField raplaIdField;
@@ -39,7 +38,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
     private JButton overviewButton;
     private Map<String, String> generatedUrls = new HashMap<>();
     private UrlOverviewDialog overviewDialog;
-    
+
     @Inject
     public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, DialogUiFactoryInterface dialogUiFactory) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
@@ -47,19 +46,24 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         loadUrlsFromXml(); // URLs aus XML laden
         initUI();
     }
-    
+
     private void initUI() {
+    	
+    	// Add a method to clean up deleted entries on startup
+        overviewDialog.cleanUpDeletedEntries();
+        
+        
         panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        
+
         JLabel nameLabel = new JLabel("Dozenten-Name eingeben:");
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(nameLabel, gbc);
-        
+
         nameField = new JTextField(20);
         gbc.gridx = 1;
         panel.add(nameField, gbc);
@@ -68,40 +72,39 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         gbc.gridx = 0;
         gbc.gridy = 1;
         panel.add(idLabel, gbc);
-        
+
         raplaIdField = new JTextField(20);
         gbc.gridx = 1;
         panel.add(raplaIdField, gbc);
-        
+
         generateButton = new JButton("Webseite generieren");
         gbc.gridx = 1;
         gbc.gridy = 2;
         panel.add(generateButton, gbc);
-        
+
         JLabel urlLabel = new JLabel("Generierte URL:");
         gbc.gridx = 0;
         gbc.gridy = 3;
         panel.add(urlLabel, gbc);
-        
+
         urlField = new JTextField(30);
         urlField.setEditable(false);
         gbc.gridx = 1;
         panel.add(urlField, gbc);
-        
+
         copyButton = new JButton("Kopieren");
         gbc.gridx = 1;
         gbc.gridy = 4;
         panel.add(copyButton, gbc);
-        
+
         overviewButton = new JButton("URL Übersicht");
         gbc.gridx = 1;
         gbc.gridy = 5;
         panel.add(overviewButton, gbc);
-        
+
         generateButton.addActionListener(e -> {
             String name = nameField.getText().trim();
             String enteredId = raplaIdField.getText().trim();
-            
             if (name.isEmpty() || enteredId.isEmpty()) {
                 JOptionPane.showMessageDialog(panel, "Bitte sowohl den Namen als auch die Rapla-ID eingeben!", "Fehler", JOptionPane.ERROR_MESSAGE);
             } else {
@@ -114,7 +117,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
                 raplaIdField.setText("");
             }
         });
-        
+
         copyButton.addActionListener(e -> {
             String url = urlField.getText();
             if (!url.isEmpty()) {
@@ -138,9 +141,8 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-
             // Wurzel-Element
-            Element rootElement = doc.createElement("urls");
+            Element rootElement = doc.createElement("url-states");
             doc.appendChild(rootElement);
 
             for (Map.Entry<String, String> entry : generatedUrls.entrySet()) {
@@ -154,6 +156,10 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
                 Element linkElement = doc.createElement("link");
                 linkElement.appendChild(doc.createTextNode(entry.getKey()));
                 urlElement.appendChild(linkElement);
+
+                Element activeElement = doc.createElement("active");
+                activeElement.appendChild(doc.createTextNode("true"));
+                urlElement.appendChild(activeElement);
             }
 
             // Schreiben in die XML-Datei
@@ -161,9 +167,8 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File("urls.xml"));
+            StreamResult result = new StreamResult(new File("url_states.xml"));
             transformer.transform(source, result);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -172,57 +177,50 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
     // Methode zum Laden der URLs aus einer XML-Datei
     private void loadUrlsFromXml() {
         try {
-            File xmlFile = new File("urls.xml");
+            File xmlFile = new File("url_states.xml");
+            if (!xmlFile.exists()) return;
+
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlFile);
             doc.getDocumentElement().normalize();
-
             NodeList urlList = doc.getElementsByTagName("url");
-
             for (int i = 0; i < urlList.getLength(); i++) {
                 Element urlElement = (Element) urlList.item(i);
                 String name = urlElement.getElementsByTagName("name").item(0).getTextContent();
                 String link = urlElement.getElementsByTagName("link").item(0).getTextContent();
                 generatedUrls.put(link, name);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    //Methode zum Laden der URLs in einer anderen Klasse
+
+    // Methode zum Laden der URLs in einer anderen Klasse
     public static Map<String, String> loadUrlsFromXmlinOtherClass() {
         Map<String, String> generatedUrls = new HashMap<>();
-
         try {
-            File xmlFile = new File("urls.xml");
+            File xmlFile = new File("url_states.xml");
             if (!xmlFile.exists()) {
                 System.out.println("XML-Datei nicht gefunden!");
                 return generatedUrls;
             }
-
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlFile);
             doc.getDocumentElement().normalize();
-
             NodeList urlList = doc.getElementsByTagName("url");
-
             for (int i = 0; i < urlList.getLength(); i++) {
                 Element urlElement = (Element) urlList.item(i);
                 String name = urlElement.getElementsByTagName("name").item(0).getTextContent();
                 String link = urlElement.getElementsByTagName("link").item(0).getTextContent();
                 generatedUrls.put(link, name);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         return generatedUrls;
     }
-
 
     @Override
     public JComponent getComponent() {

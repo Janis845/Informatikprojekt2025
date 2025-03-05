@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<url-states>
+    <url>
+        <link>http://localhost:8051/rapla/availability/5648918</link>
+        <name>Jan</name>
+        <active>true</active>
+    </url>
+    <url>
+        <link>http://localhost:8051/rapla/availability/1919894</link>
+        <name>Uwe Bormann</name>
+        <active>false</active>
+    </url>
+    <url>
+        <link>http://localhost:8051/rapla/availability/11190918</link>
+        <name>Tom Kunz</name>
+        <active>false</active>
+    </url>
+</url-states>
