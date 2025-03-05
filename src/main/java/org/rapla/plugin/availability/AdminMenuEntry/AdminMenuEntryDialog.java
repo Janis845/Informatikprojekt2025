@@ -30,7 +30,8 @@ import org.w3c.dom.NodeList;
 
 public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget {
     private JPanel panel;
-    private JTextField nameField;
+    private JTextField firstNameField;
+    private JTextField lastNameField;
     private JTextField raplaIdField;
     private JButton generateButton;
     private JTextField urlField;
@@ -43,15 +44,14 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
     public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, DialogUiFactoryInterface dialogUiFactory) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
         overviewDialog = new UrlOverviewDialog(generatedUrls);
-        loadUrlsFromXml(); // URLs aus XML laden
+        loadUrlsFromXml(); // Load URLs from XML
         initUI();
     }
 
+
     private void initUI() {
-    	
-    	// Add a method to clean up deleted entries on startup
+        // Add a method to clean up deleted entries on startup
         overviewDialog.cleanUpDeletedEntries();
-        
         
         panel = new JPanel();
         panel.setLayout(new GridBagLayout());
@@ -59,18 +59,27 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel nameLabel = new JLabel("Dozenten-Name eingeben:");
+        JLabel firstNameLabel = new JLabel("Vorname eingeben:");
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(nameLabel, gbc);
+        panel.add(firstNameLabel, gbc);
 
-        nameField = new JTextField(20);
+        firstNameField = new JTextField(10);
         gbc.gridx = 1;
-        panel.add(nameField, gbc);
+        panel.add(firstNameField, gbc);
+
+        JLabel lastNameLabel = new JLabel("Nachname eingeben:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(lastNameLabel, gbc);
+
+        lastNameField = new JTextField(10);
+        gbc.gridx = 1;
+        panel.add(lastNameField, gbc);
 
         JLabel idLabel = new JLabel("Rapla-ID eingeben:");
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         panel.add(idLabel, gbc);
 
         raplaIdField = new JTextField(20);
@@ -79,12 +88,12 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
 
         generateButton = new JButton("Webseite generieren");
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         panel.add(generateButton, gbc);
 
         JLabel urlLabel = new JLabel("Generierte URL:");
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         panel.add(urlLabel, gbc);
 
         urlField = new JTextField(30);
@@ -94,26 +103,33 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
 
         copyButton = new JButton("Kopieren");
         gbc.gridx = 1;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         panel.add(copyButton, gbc);
 
         overviewButton = new JButton("URL Übersicht");
         gbc.gridx = 1;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         panel.add(overviewButton, gbc);
 
         generateButton.addActionListener(e -> {
-            String name = nameField.getText().trim();
+            String firstName = firstNameField.getText().trim();
+            String lastName = lastNameField.getText().trim();
             String enteredId = raplaIdField.getText().trim();
-            if (name.isEmpty() || enteredId.isEmpty()) {
-                JOptionPane.showMessageDialog(panel, "Bitte sowohl den Namen als auch die Rapla-ID eingeben!", "Fehler", JOptionPane.ERROR_MESSAGE);
+            
+            if (firstName.isEmpty() || lastName.isEmpty() || enteredId.isEmpty()) {
+                JOptionPane.showMessageDialog(panel, "Bitte Vor- und Nachnamen sowie Rapla-ID eingeben!", "Fehler", JOptionPane.ERROR_MESSAGE);
             } else {
                 String generatedUrl = "http://localhost:8051/rapla/availability/" + enteredId;
                 urlField.setText(generatedUrl);
-                generatedUrls.put(generatedUrl, name);
+                
+                // Store full name as "Lastname, Firstname" for alphabetical sorting
+                String fullName = lastName + ", " + firstName;
+                generatedUrls.put(generatedUrl, fullName);
+                
                 overviewDialog.updateUrls(generatedUrls);
                 saveUrlsToXml(); // URLs in XML speichern
-                nameField.setText("");
+                firstNameField.setText("");
+                lastNameField.setText("");
                 raplaIdField.setText("");
             }
         });
@@ -134,13 +150,13 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             JOptionPane.showMessageDialog(panel, overviewDialog.getComponent(), "URL Übersicht", JOptionPane.INFORMATION_MESSAGE);
         });
     }
-
     // Methode zum Speichern der URLs in einer XML-Datei
     private void saveUrlsToXml() {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
+            
             // Wurzel-Element
             Element rootElement = doc.createElement("url-states");
             doc.appendChild(rootElement);
@@ -184,12 +200,26 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlFile);
             doc.getDocumentElement().normalize();
+            
             NodeList urlList = doc.getElementsByTagName("url");
             for (int i = 0; i < urlList.getLength(); i++) {
                 Element urlElement = (Element) urlList.item(i);
+                
                 String name = urlElement.getElementsByTagName("name").item(0).getTextContent();
                 String link = urlElement.getElementsByTagName("link").item(0).getTextContent();
-                generatedUrls.put(link, name);
+                
+                // Get active state, defaulting to true if not specified
+                boolean isActive = true;
+                if (urlElement.getElementsByTagName("active").getLength() > 0) {
+                    isActive = Boolean.parseBoolean(
+                        urlElement.getElementsByTagName("active").item(0).getTextContent()
+                    );
+                }
+                
+                // Only add if the entry is not marked as inactive
+                if (isActive) {
+                    generatedUrls.put(link, name);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -214,7 +244,19 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
                 Element urlElement = (Element) urlList.item(i);
                 String name = urlElement.getElementsByTagName("name").item(0).getTextContent();
                 String link = urlElement.getElementsByTagName("link").item(0).getTextContent();
-                generatedUrls.put(link, name);
+                
+                // Get active state, defaulting to true if not specified
+                boolean isActive = true;
+                if (urlElement.getElementsByTagName("active").getLength() > 0) {
+                    isActive = Boolean.parseBoolean(
+                        urlElement.getElementsByTagName("active").item(0).getTextContent()
+                    );
+                }
+                
+                // Only add if the entry is not marked as inactive
+                if (isActive) {
+                    generatedUrls.put(link, name);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
