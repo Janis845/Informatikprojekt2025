@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<urls>
+    <url>
+        <name>Uwe1</name>
+        <link>http://localhost:8051/rapla/availability/1234</link>
+    </url>
+    <url>
+        <name>Peter</name>
+        <link>http://localhost:8051/rapla/availability/145</link>
+    </url>
+</urls>

@@ -119,9 +119,6 @@ public class AvailabilityPageGenerator
    {
    }
 
-   private static final int MAX_AVAILABILITIES = 100;
-   private static final List<Availabilities> availabilityList = new ArrayList<>();
-   private static final Gson gson = new Gson(); // JSON-Handler
    private Map<String, String> generatedUrls = new HashMap<>();
 
    public RaplaFacade getFacade() {
@@ -163,112 +160,6 @@ public class AvailabilityPageGenerator
 
        }
    }
-
-//   private void generatePageList(User[] users,  HttpServletRequest request, HttpServletResponse response)
-//           throws IOException, ServletException
-//   {
-//       java.io.PrintWriter out = response.getWriter();
-//       try
-//       {
-//           response.setContentType("text/html; charset=" + raplaLocale.getCharsetNonUtf());
-//
-//           SortedSet<User> sortedUsers = new TreeSet<>(User.USER_COMPARATOR);
-//           sortedUsers.addAll(Arrays.asList(users));
-//
-//           String calendarName = facade.getSystemPreferences().getEntryAsString(AbstractRaplaLocale.TITLE, i18n.getString("rapla.title"));
-//           out.println("<html>");
-//           out.println("<head>");
-//           out.println("<title>" + calendarName + "</title>");
-//           String charset = raplaLocale.getCharsetNonUtf();//
-//           out.println("  <meta HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset=" + charset + "\">");
-//           out.println("</head>");
-//           out.println("<body>");
-//
-//           out.println("<h2>" + autoexportI18n.getString("webserver") + ": " + calendarName + "</h2>");
-//
-//           for (User user : sortedUsers)
-//           {
-//               Preferences preferences = facade.getPreferences(user);
-//               LinkedHashMap<String, CalendarModelConfiguration> completeMap = new LinkedHashMap<>();
-//               CalendarModelConfiguration defaultConf = preferences.getEntry(CalendarModelConfiguration.CONFIG_ENTRY);
-//               if (defaultConf != null)
-//               {
-//                   if (!isEncrypted( defaultConf)) {
-//                       completeMap.put("", defaultConf);
-//                   }
-//               }
-//
-//               final RaplaMap<CalendarModelConfiguration> raplaMap = preferences.getEntry(AvailabilityPlugin.PLUGIN_ENTRY);
-//               if (raplaMap != null)
-//               {
-//                   for (Map.Entry<String, CalendarModelConfiguration> entry : raplaMap.entrySet())
-//                   {
-//                       CalendarModelConfiguration value = entry.getValue();
-//                       if (!isEncrypted( value ) ) {
-//                           completeMap.put(entry.getKey(), value);
-//                       }
-//                   }
-//               }
-//               SortedMap<String, CalendarModelConfiguration> sortedMap = new TreeMap<>(new TitleComparator(completeMap));
-//               sortedMap.putAll(completeMap);
-//               Iterator<Map.Entry<String, CalendarModelConfiguration>> it = sortedMap.entrySet().iterator();
-//
-//               int count = 0;
-//               while (it.hasNext())
-//               {
-//                   Map.Entry<String, CalendarModelConfiguration> entry = it.next();
-//                   String key = entry.getKey();
-//                   CalendarModelConfiguration conf = entry.getValue();
-//                   final Object isSet = conf.getOptionMap().get(AvailabilityPlugin.HTML_EXPORT);
-//                   if (isSet != null && isSet.equals("false"))
-//                   {
-//                       it.remove();
-//                       continue;
-//                   }
-//                   if (count == 0)
-//                   {
-//                       String userName = user.getName();
-//                       if (userName == null || userName.trim().length() == 0)
-//                           userName = user.getUsername();
-//                       out.println("<h3>" + userName + "</h3>"); //BJO
-//                       out.println("<ul>");
-//                   }
-//                   count++;
-//                   String title = getTitle(key, conf);
-//
-//                   String filename = URLEncoder.encode(key, "UTF-8");
-//                   out.print("<li>");
-//                   String baseUrl = getBaseUrl(request);
-//
-//                   String link = baseUrl+"?user=" + user.getUsername();
-//                   if ( filename != null && !filename.isEmpty()) {
-//                       link += "&file=" + filename;
-//                   }
-//                   link+="&details=*";
-//                   link+= "&folder=true";
-//                   out.print("<a href=\"" + link + "\">");
-//                   out.print(title);
-//                   out.print("</a>");
-//                   out.println("</li>");
-//               }
-//               if (count > 0)
-//               {
-//                   out.println("</ul>");
-//               }
-//           }
-//           out.println("</body>");
-//           out.println("</html>");
-//       }
-//       catch (Exception ex)
-//       {
-//           out.println(IOUtil.getStackTraceAsString(ex));
-//           throw new ServletException(ex);
-//       }
-//       finally
-//       {
-//           out.close();
-//       }
-//   }
 
    private boolean isEncrypted(CalendarModelConfiguration conf) {
        String encyrptionSelected = conf.getOptionMap().get(UrlEncryptionPlugin.URL_ENCRYPTION);
@@ -413,67 +304,10 @@ public class AvailabilityPageGenerator
 
    }
    
-   //Variante 1: Method to receive Data and to save it -> JSON
-   @POST
-   @Consumes(MediaType.APPLICATION_JSON) // JSON wird erwartet
-   @Produces(MediaType.TEXT_PLAIN)
-   public Response handleAvailability(String jsonData) {
-       logger.info("Request erhalten für handleAvailability");
-
-       if (jsonData == null || jsonData.isEmpty()) {
-           logger.warn("Keine Verfügbarkeiten erhalten!");
-           return Response.status(Response.Status.BAD_REQUEST).entity("Keine Verfügbarkeiten erhalten!").build();
-       }
-
-       try {
-           // JSON in eine Liste von Availabilities-Objekten umwandeln
-           java.lang.reflect.Type listType = new TypeToken<List<Availabilities>>() {}.getType();
-           List<Availabilities> availabilities = gson.fromJson(jsonData, listType);
-           
-           if (availabilities == null || availabilities.isEmpty()) {
-               logger.warn("Ungültige oder leere JSON-Daten erhalten!");
-               return Response.status(Response.Status.BAD_REQUEST).entity("Ungültige oder leere JSON-Daten!").build();
-           }
-
-           // Verfügbarkeiten in die Liste speichern
-           availabilityList.addAll(availabilities);
-
-           // Debug-Ausgabe im Server-Log
-           for (Availabilities a : availabilities) {
-               logger.info("Empfangen: " + a.getDate() + " von " + a.getStarttime() + " bis " + a.getEndtime());
-           }
-           
-           logger.info("Gesamte JSON-Daten: " + jsonData);
-           return Response.ok("Verfügbarkeiten wurden gespeichert!").build();
-       } catch (Exception e) {
-           return Response.status(Response.Status.BAD_REQUEST).entity("Fehler beim Verarbeiten der JSON-Daten: " + e.getMessage()).build();
-       }
-   }
-   //Variante 2: Method to receive Data and to save it -> String
-   /*@POST
-   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-   @Produces(MediaType.TEXT_PLAIN)
-   public Response handleAvailability(
-       @FormParam("firstname") String firstname,
-       @FormParam("lastname") String lastname,
-       @FormParam("date") String date,
-       @FormParam("day") String day) {
-
-       System.out.println("Empfangene Daten: " + firstname + " " + lastname + " am " + date + " (" + day + ")");
-       
-       return Response.ok("Verfügbarkeit gespeichert!").build();
-   }
 
 
-/*
-   @GET
-   //@Produces("text/html;charset=ISO-8859-1")
-   @Produces("text/calendar;UTF-8")
-   public void notFound(@PathParam("path")  String path, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, ServletException
-   {
-       writeUnsupported(response, "text/calendar format not supported. Use ical export instead.");
-   }
-*/
+
+   
    private void writeStacktrace(HttpServletResponse response, Exception ex) throws IOException
    {
        String charsetNonUtf = raplaLocale.getCharsetNonUtf();
