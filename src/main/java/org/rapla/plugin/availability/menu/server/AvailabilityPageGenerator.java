@@ -30,6 +30,7 @@ import org.rapla.entities.domain.Allocatable;
 import org.rapla.facade.CalendarNotFoundExeption;
 import org.rapla.facade.CalendarSelectionModel;
 import org.rapla.facade.RaplaFacade;
+import org.rapla.framework.RaplaException;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.framework.internal.AbstractRaplaLocale;
 import org.rapla.logger.Logger;
@@ -182,24 +183,50 @@ public class AvailabilityPageGenerator
    @Produces({"text/html;UTF-8","text/calendar;UTF-8"})
    public void generatePage(@PathParam("id")  String path, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, ServletException
    {
-       StorageOperator operator = getFacade().getOperator();
-       Map<String, Object> threadContextMap = operator.getThreadContextMap();
-       try {
-       generatedUrls = AdminMenuEntryDialog.loadUrlsFromXmlinOtherClass();
-       }
-       catch (Exception ex){
-    	   System.out.println("Die gespeicherten URLs konnten nicht geladen werden");
-       }
+
+	   try {
+	        // System-Preferences laden (als Lesezugriff, da hier keine Änderung vorgenommen wird)
+	        String storedUrls = facade.getSystemPreferences().getEntryAsString(AvailabilityPlugin.URLS, "");
+	        List<String> urlList = new ArrayList<>();
+	        if (!storedUrls.isEmpty()) {
+	            urlList = new ArrayList<>(Arrays.asList(storedUrls.split(",")));
+	        }
+	        
+	        String currentUrl = request.getRequestURL().toString();
+	        System.out.println("Aktuelle URL: " + currentUrl);
+	        System.out.println("Gespeicherte URLs: " + urlList);
+	        
+	        // Überprüfen, ob die aktuelle URL in den gespeicherten Preferences enthalten ist
+	        if (!urlList.contains(currentUrl)) {
+	            System.out.println("Die URL ist nicht in der Liste enthalten.");
+	            String message = "404 Website not available";
+	            write404(response, message);
+	            return;
+	        } else {
+	            System.out.println("Die URL ist in der Liste enthalten.");
+	        }
+	    } catch (RaplaException e) {
+	        e.printStackTrace();
+	    }
+
+	   StorageOperator operator = getFacade().getOperator();
+	   Map<String, Object> threadContextMap = operator.getThreadContextMap();
+//       try {
+//       generatedUrls = AdminMenuEntryDialog.loadUrlsFromXmlinOtherClass();
+//       }
+//       catch (Exception ex){
+//    	   System.out.println("Die gespeicherten URLs konnten nicht geladen werden");
+//       }
        try
        {
-           if (generatedUrls.containsKey(request.getRequestURL().toString())) {
-        	    System.out.println("Die URL ist in der Liste enthalten.");
-        	} else {
-        		System.out.println("Die URL ist nicht in der Liste enthalten.");
-        		String message = "404 Website not available";
-                write404(response, message);
-                return;
-        	}
+//           if (generatedUrls.containsKey(request.getRequestURL().toString())) {
+//        	    System.out.println("Die URL ist in der Liste enthalten.");
+//        	} else {
+//        		System.out.println("Die URL ist nicht in der Liste enthalten.");
+//        		String message = "404 Website not available";
+//                write404(response, message);
+//                return;
+//        	}
 
            String username = "admin" ; //wird das benötigt?
            String filename = request.getParameter("file");
@@ -209,6 +236,7 @@ public class AvailabilityPageGenerator
            try
            {
                user = facade.getUser(username);
+               
            }
            catch (EntityNotFoundException ex)
            {

@@ -32,6 +32,7 @@ public class AvailabilityMenuEntry extends DefaultHTMLMenuEntry implements  Html
 			return entryAsBoolean;
 		}
 		catch (RaplaException ex)
+		
 		{
 			return true;
 		}

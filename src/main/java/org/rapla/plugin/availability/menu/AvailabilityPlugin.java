@@ -12,5 +12,6 @@ public class AvailabilityPlugin
     public static final String PLUGIN_ID ="org.rapla.plugin.availability";
     public static final TypedComponentRole<Boolean> SHOW_CALENDAR_LIST_IN_HTML_MENU = new TypedComponentRole<>(PLUGIN_ID + "." + "AvailabiltyPluginTest");
     public static final TypedComponentRole<Boolean> SHOW_TOOLTIP_IN_EXPORT_CONFIG_ENTRY = new TypedComponentRole<>(PLUGIN_ID + "."+ "AvailabiltyPluginTest");
+    public static final TypedComponentRole<String> URLS = new TypedComponentRole<>(PLUGIN_ID + "."+ "Urls");
 
 }
