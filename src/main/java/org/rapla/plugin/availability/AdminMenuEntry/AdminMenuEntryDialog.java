@@ -1,13 +1,17 @@
 package org.rapla.plugin.availability.AdminMenuEntry;
 
 import org.rapla.RaplaResources;
+
 import org.rapla.client.RaplaWidget;
 import org.rapla.client.swing.RaplaGUIComponent;
 import org.rapla.client.dialog.DialogUiFactoryInterface;
+import org.rapla.facade.RaplaFacade;
 import org.rapla.facade.client.ClientFacade;
+import org.rapla.framework.RaplaException;
 import org.rapla.framework.RaplaInitializationException;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.logger.Logger;
+import org.rapla.plugin.availability.menu.AvailabilityPlugin;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -15,8 +19,17 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import org.rapla.entities.configuration.Preferences;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -39,13 +52,17 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
     private JButton overviewButton;
     private Map<String, String> generatedUrls = new HashMap<>();
     private UrlOverviewDialog overviewDialog;
+    private  RaplaFacade writableFacade;
 
     @Inject
     public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, DialogUiFactoryInterface dialogUiFactory) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
-        overviewDialog = new UrlOverviewDialog(generatedUrls);
+        writableFacade = facade.getRaplaFacade();
+        overviewDialog = new UrlOverviewDialog(generatedUrls, this);
+        saveUrlsToPreferences();
         loadUrlsFromXml(); // Load URLs from XML
         initUI();
+        
     }
 
 
@@ -110,6 +127,11 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         gbc.gridx = 1;
         gbc.gridy = 6;
         panel.add(overviewButton, gbc);
+        
+        JButton saveButton = new JButton("Speichern");
+        gbc.gridx = 1;
+        gbc.gridy = 7;
+        panel.add(saveButton, gbc);
 
         generateButton.addActionListener(e -> {
             String firstName = firstNameField.getText().trim();
@@ -127,6 +149,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
                 generatedUrls.put(generatedUrl, fullName);
                 
                 overviewDialog.updateUrls(generatedUrls);
+                saveUrlsToPreferences();
                 saveUrlsToXml(); // URLs in XML speichern
                 firstNameField.setText("");
                 lastNameField.setText("");
@@ -146,8 +169,13 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         });
 
         overviewButton.addActionListener(e -> {
+        	saveUrlsToPreferences();
             overviewDialog.updateUrls(generatedUrls); // Aktualisiere die Übersicht mit den geladenen URLs
             JOptionPane.showMessageDialog(panel, overviewDialog.getComponent(), "URL Übersicht", JOptionPane.INFORMATION_MESSAGE);
+        });
+        
+        saveButton.addActionListener(e -> {
+        	saveUrlsToPreferences();
         });
     }
     // Methode zum Speichern der URLs in einer XML-Datei
@@ -185,6 +213,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File("url_states.xml"));
             transformer.transform(source, result);
+            saveUrlsToPreferences();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -226,43 +255,45 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         }
     }
 
-    // Methode zum Laden der URLs in einer anderen Klasse
-    public static Map<String, String> loadUrlsFromXmlinOtherClass() {
-        Map<String, String> generatedUrls = new HashMap<>();
-        try {
-            File xmlFile = new File("url_states.xml");
-            if (!xmlFile.exists()) {
-                System.out.println("XML-Datei nicht gefunden!");
-                return generatedUrls;
-            }
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-            doc.getDocumentElement().normalize();
-            NodeList urlList = doc.getElementsByTagName("url");
-            for (int i = 0; i < urlList.getLength(); i++) {
-                Element urlElement = (Element) urlList.item(i);
-                String name = urlElement.getElementsByTagName("name").item(0).getTextContent();
-                String link = urlElement.getElementsByTagName("link").item(0).getTextContent();
-                
-                // Get active state, defaulting to true if not specified
-                boolean isActive = true;
-                if (urlElement.getElementsByTagName("active").getLength() > 0) {
-                    isActive = Boolean.parseBoolean(
-                        urlElement.getElementsByTagName("active").item(0).getTextContent()
-                    );
-                }
-                
-                // Only add if the entry is not marked as inactive
-                if (isActive) {
-                    generatedUrls.put(link, name);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return generatedUrls;
+   
+    void saveUrlsToPreferences() {
+        Preferences writablePreferences;
+		try {
+			writablePreferences = writableFacade.edit(writableFacade.getSystemPreferences());
+	        String oldUrls = writablePreferences.getEntryAsString(AvailabilityPlugin.URLS, "");
+	        List<String> urlList = new ArrayList<>(Arrays.asList(oldUrls.split(",")));
+
+	        // Neue URLs hinzufügen
+	        for (Map.Entry<String, String> entry : generatedUrls.entrySet()) {
+	            String generatedUrl = entry.getKey();
+	            String fullName = entry.getValue();
+
+	            // Überprüfen, ob die URL bereits vorhanden ist
+	            if (!urlList.contains(generatedUrl)) {
+	                urlList.add(generatedUrl);
+	            }
+	        }
+	        Set<String> previousUrls = new HashSet<>(urlList);
+	       
+	        // Überprüfen, ob URLs entfernt wurden
+	        previousUrls.removeAll(generatedUrls.keySet());
+	        if (!previousUrls.isEmpty()) {
+	            // Entfernte URLs aus den Preferences löschen
+	            urlList.removeAll(previousUrls);
+	        }
+
+	        // Speichern der aktualisierten Liste als String
+	        writablePreferences.putEntry(AvailabilityPlugin.URLS, String.join(",", urlList));
+	        writableFacade.store(writablePreferences); // Änderungen speichern
+		} catch (RaplaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
     }
+
+    
 
     @Override
     public JComponent getComponent() {

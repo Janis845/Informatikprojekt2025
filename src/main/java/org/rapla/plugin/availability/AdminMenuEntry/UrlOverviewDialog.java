@@ -29,6 +29,7 @@ public class UrlOverviewDialog implements RaplaWidget {
     private DefaultTableModel tableModel;
     private Map<String, UrlEntry> urlEntries;
     private JButton closeButton;
+    private AdminMenuEntryDialog entryDialog;
 
     // Enhanced UrlEntry class to track state
     private static class UrlEntry {
@@ -45,9 +46,10 @@ public class UrlOverviewDialog implements RaplaWidget {
         }
     }
 
-    public UrlOverviewDialog(Map<String, String> urlNameMap) {
+    public UrlOverviewDialog(Map<String, String> urlNameMap, AdminMenuEntryDialog entryDialog) {
         // Initialize urlEntries with loaded URLs from XML
         this.urlEntries = new HashMap<>();
+        this.entryDialog = entryDialog;
         loadUrlStatesFromXml();
 
         // Add any new URLs that aren't already in the map
@@ -284,6 +286,7 @@ public class UrlOverviewDialog implements RaplaWidget {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File("url_states.xml"));
             transformer.transform(source, result);
+			entryDialog.saveUrlsToPreferences(); //speichert die aktuellen URLs aus generatedUrls ab und löscht damit auch URLs, falls sie gelöscht werden
         } catch (Exception e) {
             e.printStackTrace();
         }
