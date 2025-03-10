@@ -297,6 +297,7 @@ public abstract class LocalAbstractCachableOperator extends AbstractCachableOper
             addAttributeWithInternalId(type, "surname", AttributeType.STRING);
             addAttributeWithInternalId(type, "firstname", AttributeType.STRING);
             addAttributeWithInternalId(type, "email", AttributeType.STRING);
+            addAttributeWithInternalId(type, "Studiengang", AttributeType.STRING); //hinzugefügt 25.02.25 
             {
                 Permission newPermission = type.newPermission();
                 newPermission.setAccessLevel(Permission.READ_TYPE);
@@ -1429,15 +1430,8 @@ public abstract class LocalAbstractCachableOperator extends AbstractCachableOper
                 final Class<? extends Entity> type = reference.getType();
                 if (type == Reservation.class)
                 {
-                    Entity lastKnown = result.getLastEntryBeforeUpdate(reference);
-                    if ( lastKnown == null ) {
-                        lastKnown = tryResolve(reference);
-                    }
-                    if ( lastKnown == null ) {
-                        logger.error("Reservation thats is scheduled to delete not found " + reference.getId());
-                    } else {
-                        appointmentBindings.updateReservation((Reservation) lastKnown, toUpdate, true);
-                    }
+                    final Entity lastKnown = result.getLastEntryBeforeUpdate(reference);
+                    appointmentBindings.updateReservation( (Reservation) lastKnown, toUpdate, true);
                 }
                 else if (type == Allocatable.class)
                 {

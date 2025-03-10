@@ -811,6 +811,15 @@ public class FacadeImpl implements RaplaFacade {
 			dynamicType.addAttribute(createStringAttribute("surname", "surname"));
 			dynamicType.addAttribute(createStringAttribute("firstname", "firstname"));
 			dynamicType.addAttribute(createStringAttribute("email", "email"));
+			
+			
+			
+			dynamicType.addAttribute(createStringAttribute("Studiengang", "Studiengang")); //hinzugefügt am 25.02.25
+			
+			
+			
+			
+			
 			dynamicType.setAnnotation(DynamicTypeAnnotations.KEY_NAME_FORMAT, "{surname} {firstname}");
 			dynamicType.setAnnotation(DynamicTypeAnnotations.KEY_COLORS, null);
             addDefaultResourcePermissions(dynamicType);

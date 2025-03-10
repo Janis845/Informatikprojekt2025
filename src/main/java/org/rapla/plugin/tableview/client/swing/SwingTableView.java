@@ -292,14 +292,32 @@ public class SwingTableView<T> extends RaplaGUIComponent implements SwingCalenda
             {
                 int sortingStatus = sorter.getSortingStatus( i);
                 if (sortingStatus == TableSorter.ASCENDING)
-                {
+                 {
                     buf.append(i + "+;");
                 }
                 if (sortingStatus == TableSorter.DESCENDING)
                 {
                     buf.append(i + "-;");
                 }
+            	
+               //String columnName = table.getColumnName(i);
+                
+                // Prüfe, ob es die spezielle Ressource ist
+                //if (columnName.equals("ressource1")) {
+                   // buf.insert(0, i + "+;"); // Setze sie immer an erste Stelle
+               // } else {
+                   // int sortingStatus = sorter.getSortingStatus(i);
+                   // if (sortingStatus == TableSorter.ASCENDING) {
+                    //    buf.append(i + "+;");
+                    //}
+                   // if (sortingStatus == TableSorter.DESCENDING) {
+                   //     buf.append(i + "-;");
+                   // }
+               // }
             }
+            	
+                // Zeile 303 bis 317 dazu 04.03.25   	           	
+            
             String sortingString = buf.toString();
             ((CalendarSelectionModel)model).setOption(sortingStringOptionName, sortingString.length() > 0 ? sortingString : null);
         });

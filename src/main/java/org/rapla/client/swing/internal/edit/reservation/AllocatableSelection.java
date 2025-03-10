@@ -169,9 +169,15 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
 
     Map<ReferenceInfo<Allocatable>, Collection<Appointment>> allocatableBindings = new HashMap<>();
     //	Map<Appointment,Collection<Allocatable>> appointmentMap	= new HashMap<Appointment,Collection<Allocatable>>();
-    Appointment[] appointments;
+    Appointment[] appointments;    
+    
     String[] appointmentStrings;
     String[] appointmentIndexStrings;
+    
+    
+   
+    
+    
 
     ModifiableCalendarState calendarModel;
     EventListenerList listenerList = new EventListenerList();
@@ -511,6 +517,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
     }
 
     private boolean bWorkaround = false; // Workaround for Bug ID  4480264 on developer.java.sun.com
+	public Classification type;
 
     public void setReservation(Collection<Reservation> mutableReservation, Collection<Reservation> originalReservations) throws RaplaException
     {
@@ -1270,21 +1277,73 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
     class AllocationRendering
     {
         boolean[] conflictingAppointments = new boolean[appointments.length]; // stores the temp conflicting appointments
+        boolean[] availabilityConflicts = new boolean[appointments.length]; //neu
+        
+        
+        
         int conflictCount = 0; // temp value for conflicts
         int permissionConflictCount = 0; // temp value for conflicts that are the result of denied permission
+        
+        
+        boolean isavailabilityConflictCount = false; //neu
+        
         RequestStatus requestStatus;
+        
+        
+        //Diese Klasse erweitern, um zu speichern, dass nur Verfügbarkeiten zu den Konflikten geführt haben
+        
+        
+        
+        
+        
+        
     }
+    
+    
+         
+    
+    //String classificationtype = ""; // hinzugefügt 06.03.25    
 
     // calculates the number of conflicting appointments for this allocatable
     private AllocationRendering calcConflictingAppointments(Allocatable allocatable)
     {
+    	System.out.println(allocatable.getId());
+    	
+    	
         AllocationRendering result = new AllocationRendering();
         String annotation = allocatable.getAnnotation(ResourceAnnotations.KEY_CONFLICT_CREATION);
         boolean holdBackConflicts = annotation != null && annotation.equals(ResourceAnnotations.VALUE_CONFLICT_CREATION_IGNORE);
         for (int i = 0; i < appointments.length; i++)
         {
             Appointment appointment = appointments[i];
-            Collection<Appointment> collection = allocatableBindings.get(allocatable.getReference());
+            Collection<Appointment> collection = allocatableBindings.get(allocatable.getReference()); //Collection ausgeben
+            
+            for (Appointment c : collection)
+            {
+            	System.out.println(c.getReservation().getName(getLocale())); //hier dann prüfen ob Kon
+            	Reservation reservation = c.getReservation(); // ruft ab wann der Termin ist
+            	// Der Type der Veranstaltung
+            	DynamicType type = reservation.getClassification().getType(); // ruft Veranstaltungstyp ab
+            	
+            	String classificationtype = type.getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE); // speicheurng als String
+            	
+            	System.out.println("Zeile1384 Reservation: " + reservation);
+            	System.out.println("Zeile1385 Type: " + type);
+            	System.out.println("Zeile13865 Type: " + classificationtype);
+            	
+            	//hier die Logik einfügen, die ermittelt, dass ausschließlich Überschneidungen mit Verfügbarkeiten zum Konflikt geführt haben
+            	
+            	
+            	boolean isAvailabilityConflict = classificationtype.equals("availability"); // neu wird true wenn Typ Availability
+            	
+            	if (isAvailabilityConflict == true)
+            		{
+            			result.isavailabilityConflictCount = true;
+            			return result;
+            			
+            		}
+            }
+            
             boolean conflictingAppointments = collection != null && collection.contains(appointment);
             result.conflictingAppointments[i] = false;
             final RequestStatus status = appointment.getReservation().getRequestStatus(allocatable);
@@ -1293,9 +1352,20 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                     result.requestStatus = status;
                 }
             }
+            
             if (conflictingAppointments)
             {
-                if (!holdBackConflicts)
+            	                
+            	//von Bonifacius
+            	
+            	
+            	
+            	//System.out.println("Zeile1356 konflikt mit Verfügb.: " + isAvailabilityConflict);
+            	           	
+            	//System.out.println("Zeile1319 Classification Type: " + classificationtype);
+
+            	
+            	if (!holdBackConflicts)
                 {
                     result.conflictingAppointments[i] = true;
                     result.conflictCount++;
@@ -1985,6 +2055,8 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         Icon personNotAlwaysAvailableIcon;
         Icon forbiddenIcon;
         Icon requestIcon;
+        Icon availabilityIcon; //neu 08.03.2025
+        
         boolean checkRestrictions;
 
         public AllocationTreeCellRenderer(boolean checkRestrictions)
@@ -1996,6 +2068,9 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             notAlwaysAvailableIcon = RaplaImages.getIcon(i18n.getIcon("icon.allocatable_not_always_available"));
             personIcon = RaplaImages.getIcon(i18n.getIcon("icon.tree.persons"));
             personNotAlwaysAvailableIcon = RaplaImages.getIcon(i18n.getIcon("icon.tree.person_not_always_available"));
+            
+            availabilityIcon = RaplaImages.getIcon(i18n.getIcon("icon.availability"));// neu 08.03.2025
+            
             this.checkRestrictions = checkRestrictions;
             setOpenIcon(RaplaImages.getIcon(i18n.getIcon("icon.folder")));
             setClosedIcon(RaplaImages.getIcon(i18n.getIcon("icon.folder")));
@@ -2023,6 +2098,23 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             Date today = getQuery().today();
 
             AllocationRendering allocBinding = calcConflictingAppointments(allocatable);
+            
+            
+            
+            //Hier können Sie die Erweiterung der Klasse AllocationRendering nutzen, um ein anderen Icon für Verfügbarkeitsüberschneidung anzuzeigen.
+            
+            if (allocBinding.isavailabilityConflictCount == true)
+            {
+            	
+            	System.out.println("if Abfrage anderes Icon");
+            	return availabilityIcon;
+            }
+            
+            else
+            {
+            
+            
+            
             if (allocBinding.conflictCount == 0)
             {
                 return getAvailableIcon(allocatable);
@@ -2041,13 +2133,33 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                     }
                 }
                 else
-                {
-                    return conflictIcon;
+                {	
+                	
+                	
+					//System.out.println("Zeile 2070 Classification Type: " + classificationtype);
+                	//System.out.println("Zeile 2070 Länge von classificationtype: " + classificationtype.length());
+                	
+					//ab hier neu
+                	//if ("reservation".equals(classificationtype))
+                	//{
+                		
+                		//System.out.println("jetzt in if Bedingung ");                	
+                    	//return requestIcon; //geändert von conflict zu person/free
+                	//}
+                    //else
+                    //{
+                      return conflictIcon;
+                    //}
+                    
+                	
+                	// vorher nur in else return conflictIcon;
                 }
             }
+            
             else if (!checkRestrictions)
             {
                 return getNotAlwaysAvailableIcon(allocatable);
+            }
             }
 
             if (checkRestrictions && permissionController.isRequestOnly( allocatable, user,  today))
@@ -2204,17 +2316,13 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
 
         String command;
 
-        private final TreeFactory treeFactory;
-
         public AllocatableAction(TreeFactory treeFactory)
         {
-            this.treeFactory = treeFactory;
         }
 
         AllocatableAction(String command, TreeFactory treeFactory)
         {
             this.command = command;
-            this.treeFactory = treeFactory;
             if (command.equals("add"))
             {
                 putValue(NAME, getString("add"));

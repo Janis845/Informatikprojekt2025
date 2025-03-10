@@ -341,6 +341,21 @@ public class TableSorter extends AbstractTableModel {
                 Object o2 = tableModel.getValueAt(row2, column);
 
                 int comparison = 0;
+                
+                
+                
+                // Falls "ressource1" in einer der Zeilen vorkommt, setze sie nach vorne
+                if (o1 != null && o1.toString().equals("ressource1")) {
+                    return -1; // row1 (ressource1) soll immer vorne sein
+                }
+                if (o2 != null && o2.toString().equals("ressource1")) {
+                    return 1; // row2 (ressource1) soll immer vorne sein
+                }
+                
+                //hinzugefügt am 04.03.25
+                
+                
+                
                 // Define null less than everything, except null.
                 if (o1 == null && o2 == null) {
                     comparison = 0;
@@ -351,26 +366,38 @@ public class TableSorter extends AbstractTableModel {
                 } else {
                     if ( isSortabe(column) )
                     {
-                        comparison = getComparator(column).compare(o1, o2);
+                        //if
+                        //{}
+                        
+                        //else
+                    	comparison = getComparator(column).compare(o1, o2);
+                        
                     }
                 }
                 if (comparison != 0) {
                     return directive.direction == DESCENDING ? -comparison : comparison;
                 }
             }
-            if ( row1 == row2)
-            {
-                return 0;
-            }
-            if ( row1< row2)
-            {
-                return -1;
-            }
-            else
-            {
-                return 1;
-            }
-        }
+            
+            //auskommentiert wegen zusatz oben
+            
+            
+            //if ( row1 == row2)
+            //{
+            //    return 0;
+            //}
+            //if ( row1< row2)
+            //{
+            //    return -1;
+            //}
+            //else
+            //{
+            //    return 1;
+            //}
+        //}
+            
+        return Integer.compare(row1, row2); //hinzugefügt 04.03.25
+    }
     }
 
     private class TableModelHandler implements TableModelListener {

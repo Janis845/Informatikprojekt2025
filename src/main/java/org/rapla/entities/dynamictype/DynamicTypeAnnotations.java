@@ -23,7 +23,9 @@ public interface DynamicTypeAnnotations
     String VALUE_CLASSIFICATION_TYPE_RESOURCE="resource";
     String VALUE_CLASSIFICATION_TYPE_RESERVATION="reservation";
     String VALUE_CLASSIFICATION_TYPE_PERSON="person";
+    String VALUE_CLASSIFICATION_TYPE_AVAILABILITY="availability"; //hinzugefügt 06.03.25
     String VALUE_CLASSIFICATION_TYPE_RAPLATYPE="rapla";
+    
     
     String KEY_COLORS="colors";
 	String VALUE_COLORS_AUTOMATED = "rapla:automated";
@@ -41,6 +43,9 @@ public interface DynamicTypeAnnotations
 	
 	String KEY_LOCATION="location";
     String KEY_DELETE_EXTERNALS_ON_RESOURCE_DELETE = "deleteExternalsOnResourceDelete";
+	//Object VALUE_CLASSIFICATION_TYPE_AVAILABILITY = null; auskommentiert am 06.03.25
+	
+	
 }
 
 
