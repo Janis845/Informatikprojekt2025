@@ -37,7 +37,7 @@ public class ReservationPresenter implements Presenter
     private final ApplicationEventBus eventBus;
     private final ReservationView view;
 
-    private Reservation editReservation;
+    private Reservation editReservation;  //test
     private Appointment selectedAppointment;
     private boolean isNew;
     private final PermissionController permissionController;
