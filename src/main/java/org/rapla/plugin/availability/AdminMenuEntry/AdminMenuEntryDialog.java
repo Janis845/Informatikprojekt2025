@@ -127,11 +127,6 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         gbc.gridx = 1;
         gbc.gridy = 6;
         panel.add(overviewButton, gbc);
-        
-        JButton saveButton = new JButton("Speichern");
-        gbc.gridx = 1;
-        gbc.gridy = 7;
-        panel.add(saveButton, gbc);
 
         generateButton.addActionListener(e -> {
             String firstName = firstNameField.getText().trim();
@@ -172,10 +167,6 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         	saveUrlsToPreferences();
             overviewDialog.updateUrls(generatedUrls); // Aktualisiere die Übersicht mit den geladenen URLs
             JOptionPane.showMessageDialog(panel, overviewDialog.getComponent(), "URL Übersicht", JOptionPane.INFORMATION_MESSAGE);
-        });
-        
-        saveButton.addActionListener(e -> {
-        	saveUrlsToPreferences();
         });
     }
     // Methode zum Speichern der URLs in einer XML-Datei
