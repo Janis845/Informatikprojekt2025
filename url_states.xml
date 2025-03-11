@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <url-states>
     <url>
-        <name>Kunz, Tom</name>
-        <link>http://localhost:8051/rapla/availability/4989198</link>
+        <name>Hans, Test</name>
+        <link>http://localhost:8051/rapla/DHBW-Heidenheim/availability/854981</link>
         <active>false</active>
     </url>
     <url>
         <name>Bormann, Uwe</name>
         <link>http://localhost:8051/rapla/availability/r4c11f17-a4e9-4544-bd27-31af7476f4d0</link>
-        <active>true</active>
-    </url>
-    <url>
-        <name>Wurst, Hans</name>
-        <link>http://localhost:8051/rapla/availability/549889</link>
         <active>true</active>
     </url>
     <url>

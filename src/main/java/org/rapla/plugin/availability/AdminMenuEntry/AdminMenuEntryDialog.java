@@ -137,6 +137,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
                 JOptionPane.showMessageDialog(panel, "Bitte Vor- und Nachnamen sowie Rapla-ID eingeben!", "Fehler", JOptionPane.ERROR_MESSAGE);
             } else {
                 String generatedUrl = "http://localhost:8051/rapla/availability/" + enteredId;
+                //String generatedUrl = "http://dhbw-heidenheim/Dozenten/rapla/availability/" + enteredId;
                 urlField.setText(generatedUrl);
                 
                 // Store full name as "Lastname, Firstname" for alphabetical sorting
