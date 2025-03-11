@@ -14,13 +14,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import java.util.Locale;
 
 @Extension(provides = PluginOptionPanel.class, id = AvailabilityPlugin.PLUGIN_ID)
 public class AvailabilityPluginOption implements PluginOptionPanel
 {
-    JCheckBox test1 = new JCheckBox();
-    JCheckBox test2 = new JCheckBox();
+	 JTextField domainField = new JTextField();
     JComponent component;
     Preferences preferences;
 
@@ -32,16 +33,17 @@ public class AvailabilityPluginOption implements PluginOptionPanel
     protected JPanel createPanel() throws RaplaException
     {
         JPanel content = new JPanel();
-        double[][] sizes = new double[][] { { 5, TableLayout.PREFERRED, 5, TableLayout.FILL, 5 },
-                { TableLayout.PREFERRED, 5, TableLayout.PREFERRED, 5, TableLayout.PREFERRED, 5, TableLayout.PREFERRED, 5, TableLayout.PREFERRED } };
+        double[][] sizes = new double[][] { 
+            { 5, TableLayout.PREFERRED, 5, TableLayout.FILL, 5 },
+            { TableLayout.PREFERRED, 5, TableLayout.PREFERRED, 5, TableLayout.PREFERRED, 5, TableLayout.PREFERRED, 5, TableLayout.PREFERRED }
+        };
         TableLayout tableLayout = new TableLayout(sizes);
         content.setLayout(tableLayout);
-        content.add(new JLabel("This is a test 1"), "1,4");
-        content.add(test1, "3,4");
-        content.add(new JLabel("This is another test"), "1,6");
-        content.add(test2, "3,6");
+        
+        content.add(new JLabel("Enter the Server Domain (e.g. http://dhbw-heidenheim)"), "1,4");
+        content.add(domainField, "1,6,3,4");
+        
         return content;
-
     }
 
     @Override
@@ -59,15 +61,13 @@ public class AvailabilityPluginOption implements PluginOptionPanel
     @Override
     public void commit() throws RaplaException
     {
-        preferences.putEntry(AvailabilityPlugin.SHOW_CALENDAR_LIST_IN_HTML_MENU, test1.isSelected());
-        preferences.putEntry(AvailabilityPlugin.SHOW_TOOLTIP_IN_EXPORT_CONFIG_ENTRY, test2.isSelected());
+        preferences.putEntry(AvailabilityPlugin.SERVER_DOMAIN,domainField.getText());
     }
 
     @Override
     public void show() throws RaplaException
     {
-        test1.setSelected(preferences.getEntryAsBoolean(AvailabilityPlugin.SHOW_CALENDAR_LIST_IN_HTML_MENU, true));
-        test2.setSelected(preferences.getEntryAsBoolean(AvailabilityPlugin.SHOW_TOOLTIP_IN_EXPORT_CONFIG_ENTRY, true));
+        domainField.setText(preferences.getEntryAsString(AvailabilityPlugin.SERVER_DOMAIN,""));
         component = createPanel();
     }
 

@@ -53,22 +53,33 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
     private Map<String, String> generatedUrls = new HashMap<>();
     private UrlOverviewDialog overviewDialog;
     private  RaplaFacade writableFacade;
+    private Preferences writablePreferences;
+    private String serverDomain;
 
     @Inject
     public AdminMenuEntryDialog(ClientFacade facade, RaplaResources i18n, RaplaLocale raplaLocale, Logger logger, DialogUiFactoryInterface dialogUiFactory) throws RaplaInitializationException {
         super(facade, i18n, raplaLocale, logger);
         writableFacade = facade.getRaplaFacade();
         overviewDialog = new UrlOverviewDialog(generatedUrls, this);
+        initUI();
+        
         saveUrlsToPreferences();
         loadUrlsFromXml(); // Load URLs from XML
-        initUI();
         
     }
 
 
     private void initUI() {
         // Add a method to clean up deleted entries on startup
-        overviewDialog.cleanUpDeletedEntries();
+    	try {
+			writablePreferences = writableFacade.edit(writableFacade.getSystemPreferences());
+		} catch (RaplaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	serverDomain = writablePreferences.getEntryAsString(AvailabilityPlugin.SERVER_DOMAIN,"");
+    	 
+    	overviewDialog.cleanUpDeletedEntries();
         
         panel = new JPanel();
         panel.setLayout(new GridBagLayout());
@@ -136,7 +147,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
             if (firstName.isEmpty() || lastName.isEmpty() || enteredId.isEmpty()) {
                 JOptionPane.showMessageDialog(panel, "Bitte Vor- und Nachnamen sowie Rapla-ID eingeben!", "Fehler", JOptionPane.ERROR_MESSAGE);
             } else {
-                String generatedUrl = "http://localhost:8051/rapla/availability/" + enteredId;
+                String generatedUrl = serverDomain + "/rapla/availability/" + enteredId;
                 //String generatedUrl = "http://dhbw-heidenheim/Dozenten/rapla/availability/" + enteredId;
                 urlField.setText(generatedUrl);
                 
@@ -249,9 +260,7 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
 
    
     void saveUrlsToPreferences() {
-        Preferences writablePreferences;
 		try {
-			writablePreferences = writableFacade.edit(writableFacade.getSystemPreferences());
 	        String oldUrls = writablePreferences.getEntryAsString(AvailabilityPlugin.URLS, "");
 	        List<String> urlList = new ArrayList<>(Arrays.asList(oldUrls.split(",")));
 
