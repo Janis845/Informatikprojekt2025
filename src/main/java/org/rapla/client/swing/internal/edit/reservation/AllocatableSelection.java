@@ -1289,8 +1289,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         
         RequestStatus requestStatus;
         
-        
-        //Diese Klasse erweitern, um zu speichern, dass nur Verfügbarkeiten zu den Konflikten geführt haben
+         
         
         
         
@@ -1307,7 +1306,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
     // calculates the number of conflicting appointments for this allocatable
     private AllocationRendering calcConflictingAppointments(Allocatable allocatable)
     {
-    	System.out.println(allocatable.getId());
+    	System.out.println("Z.1310" + allocatable.getId());
     	
     	
         AllocationRendering result = new AllocationRendering();
@@ -2136,23 +2135,12 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                 {	
                 	
                 	
-					//System.out.println("Zeile 2070 Classification Type: " + classificationtype);
-                	//System.out.println("Zeile 2070 Länge von classificationtype: " + classificationtype.length());
-                	
-					//ab hier neu
-                	//if ("reservation".equals(classificationtype))
-                	//{
-                		
-                		//System.out.println("jetzt in if Bedingung ");                	
-                    	//return requestIcon; //geändert von conflict zu person/free
-                	//}
-                    //else
-                    //{
+					
                       return conflictIcon;
-                    //}
+                    
                     
                 	
-                	// vorher nur in else return conflictIcon;
+                	
                 }
             }
             
