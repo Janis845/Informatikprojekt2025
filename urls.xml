@@ -9,6 +9,10 @@
         <link>http://example.com/availability?raplaId=ssss</link>
     </url>
     <url>
+        <name>aaaa</name>
+        <link>http://localhost:8051/rapla/availability/123456543456543234565432345675432</link>
+    </url>
+    <url>
         <name>aaaaa</name>
         <link>http://example.com/availability?raplaId=aaaa</link>
     </url>

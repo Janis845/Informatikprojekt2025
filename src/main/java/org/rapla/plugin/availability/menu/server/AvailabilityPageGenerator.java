@@ -415,10 +415,12 @@ public class AvailabilityPageGenerator
    }
    
    //Variante 1: Method to receive Data and to save it -> JSON
+   
    @POST
    @Consumes("application/json")
    @Produces("text/plain")
-   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities) {
+  
+   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities, @Context HttpServletRequest request, @PathParam("id")  String path) {
        try {
            System.out.println("🚀 POST-Request empfangen!");
 
@@ -426,6 +428,43 @@ public class AvailabilityPageGenerator
            for (com.google.gson.internal.LinkedTreeMap availability : availabilities) {
                System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
            }
+           final User user = facade.getUser("admin");
+           generatedUrls.containsKey(request.getRequestURL().toString());
+           System.out.println("URL: " + request.getRequestURL().toString());
+           
+           
+           facade.getAllocatables();
+           return Response.ok("Erfolgreich empfangen").build();
+       } 
+       
+       catch (Exception e) {
+           e.printStackTrace();
+           return Response.status(Response.Status.BAD_REQUEST).entity("Invalid JSON format").build();
+       }
+   }
+   
+  /*
+   @POST
+   @Path("{id}")
+   @Consumes("application/json")
+   @Produces("text/plain")
+   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities, @Context HttpServletRequest request, @PathParam("id") String path) {
+       try {
+           System.out.println("🚀 POST-Request empfangen!");
+
+           // Verfügbarkeiten durchlaufen und ausgeben
+           for (com.google.gson.internal.LinkedTreeMap availability : availabilities) {
+               System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
+               System.out.println("📌 Extrahierte ID: " + path);
+               System.out.println("URL: " + request.getRequestURL().toString());
+           }
+           
+           final User user = facade.getUser("admin");
+           generatedUrls.containsKey(request.getRequestURL().toString());
+           System.out.println("URL: " + request.getRequestURL().toString());
+           
+           
+           facade.getAllocatables();
 
            return Response.ok("Erfolgreich empfangen").build();
 
@@ -434,8 +473,8 @@ public class AvailabilityPageGenerator
            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid JSON format").build();
        }
    }
-
-
+*/
+   
    //Variante 2: Method to receive Data and to save it -> String
    /*@POST
    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
