@@ -27,9 +27,14 @@ import org.rapla.entities.configuration.CalendarModelConfiguration;
 import org.rapla.entities.configuration.Preferences;
 import org.rapla.entities.configuration.RaplaMap;
 import org.rapla.entities.domain.Allocatable;
+import org.rapla.entities.domain.Appointment;
+import org.rapla.entities.domain.Reservation;
+import org.rapla.entities.dynamictype.Classification;
+import org.rapla.entities.storage.ReferenceInfo;
 import org.rapla.facade.CalendarNotFoundExeption;
 import org.rapla.facade.CalendarSelectionModel;
 import org.rapla.facade.RaplaFacade;
+import org.rapla.framework.RaplaException;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.framework.internal.AbstractRaplaLocale;
 import org.rapla.logger.Logger;
@@ -68,11 +73,13 @@ import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -304,6 +311,7 @@ public class AvailabilityPageGenerator
        {
            if (generatedUrls.containsKey(request.getRequestURL().toString())) {
         	    System.out.println("Die URL ist in der Liste enthalten.");
+        	    System.out.println(path); //cambiar ID?
         	} else {
         		System.out.println("Die URL ist nicht in der Liste enthalten.");
         		String message = "404 Website not available";
@@ -419,6 +427,56 @@ public class AvailabilityPageGenerator
    @POST
    @Consumes("application/json")
    @Produces("text/plain")
+   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities, @Context HttpServletRequest request, @PathParam("id") String path) {
+       try {
+           System.out.println("🚀 POST-Request empfangen!");
+
+           // Benutzer und Allocatable aus dem System holen
+           final User user = facade.getUser("admin");
+           String raplaID = "r8c5fee3-ab5e-4995-aa72-234c77cb7193";
+           Allocatable allocatable = facade.resolve(new ReferenceInfo<Allocatable>(raplaID, Allocatable.class));
+
+           // Neue Reservierung erstellen
+           Classification classification = facade.getDynamicType("availability").newClassification();
+           Reservation event = facade.newReservation(classification, user);
+
+           // Verfügbarkeiten durchlaufen und Appointments hinzufügen
+           for (com.google.gson.internal.LinkedTreeMap availability : availabilities) {
+               System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
+
+               // Start- und Endzeit aus dem JSON-Objekt extrahieren
+               String startStr = (String) availability.get("starttime");
+               String endStr = (String) availability.get("endtime");
+               String dateStr = (String) availability.get("date");
+
+               // Zeitformat anpassen (z. B. ISO 8601: "2025-03-15T09:00:00")
+               SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+               Date start = dateFormat.parse(dateStr +" " + startStr);
+               Date end = dateFormat.parse(dateStr +" " +endStr);
+
+               // Neues Appointment hinzufügen
+               Appointment appointment = facade.newAppointmentWithUser(start, end, user);
+               event.addAppointment(appointment);
+           }
+
+           // Allocatable (z. B. Raum) zuweisen
+           event.addAllocatable(allocatable);
+
+           // Reservierung speichern
+           facade.storeObjects(new Reservation[]{event});
+
+           System.out.println("✅ Reservierung erfolgreich erstellt!");
+           return Response.ok("Erfolgreich empfangen und gespeichert").build();
+       } catch (Exception e) {
+           e.printStackTrace();
+           return Response.status(Response.Status.BAD_REQUEST).entity("Fehler beim Verarbeiten der Anfrage").build();
+       }
+   }
+   
+   /*
+   @POST
+   @Consumes("application/json")
+   @Produces("text/plain")
   
    public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities, @Context HttpServletRequest request, @PathParam("id")  String path) {
        try {
@@ -429,9 +487,23 @@ public class AvailabilityPageGenerator
                System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
            }
            final User user = facade.getUser("admin");
+           String raplaID = "r8c5fee3-ab5e-4995-aa72-234c77cb7193";
+           Allocatable allocatable = facade.resolve(new ReferenceInfo<Allocatable>(raplaID, Allocatable.class));
+           facade.newReservation(null, user);
+           
            generatedUrls.containsKey(request.getRequestURL().toString());
            System.out.println("URL: " + request.getRequestURL().toString());
            
+           
+           //event.addAllocatable(raplaID);
+          
+          // private Appointment newAppointment(User user,Date begin, Date end) throws RaplaException {
+          // Appointment appointment = facade.newAppointmentWithUser(begin,end,user);
+          // return appointment;
+           
+           //event.addAppointment( appointment);
+           //lookupEvent = facade.newReservation(classification,user);
+       }
            
            facade.getAllocatables();
            return Response.ok("Erfolgreich empfangen").build();
@@ -442,6 +514,8 @@ public class AvailabilityPageGenerator
            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid JSON format").build();
        }
    }
+   
+   */
    
   /*
    @POST
