@@ -6,8 +6,7 @@ import org.rapla.components.layout.TableLayout;
 import org.rapla.entities.configuration.Preferences;
 import org.rapla.framework.RaplaException;
 import org.rapla.inject.Extension;
-import org.rapla.plugin.availability.menu.AvailabilityPlugin;
-import org.rapla.plugin.availability.menu.AvailabilityPlugin;
+import org.rapla.plugin.availability.AvailabilityPlugin;
 
 import javax.inject.Inject;
 import javax.swing.JCheckBox;

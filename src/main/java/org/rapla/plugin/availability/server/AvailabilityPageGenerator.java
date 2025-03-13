@@ -1,4 +1,4 @@
-package org.rapla.plugin.availability.menu.server;
+package org.rapla.plugin.availability.server;
 
 /*--------------------------------------------------------------------------*
 | Copyright (C) 2014 Christopher Kohlhaas                                  |
@@ -34,10 +34,9 @@ import org.rapla.framework.RaplaException;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.framework.internal.AbstractRaplaLocale;
 import org.rapla.logger.Logger;
+import org.rapla.plugin.availability.AvailabilityPlugin;
 import org.rapla.plugin.availability.AvailabilityResources;
-import org.rapla.plugin.availability.availabilityWebpage;
 import org.rapla.plugin.availability.AdminMenuEntry.AdminMenuEntryDialog;
-import org.rapla.plugin.availability.menu.AvailabilityPlugin;
 import org.rapla.plugin.urlencryption.UrlEncryption;
 import org.rapla.plugin.urlencryption.UrlEncryptionPlugin;
 import org.rapla.server.extensionpoints.HTMLViewPage;
@@ -120,8 +119,6 @@ public class AvailabilityPageGenerator
    {
    }
 
-   private Map<String, String> generatedUrls = new HashMap<>();
-
    public RaplaFacade getFacade() {
        return facade;
    }
@@ -174,7 +171,7 @@ public class AvailabilityPageGenerator
 
    @NotNull
    protected String getBasePath() {
-       return "rapla/availability"; //change: laut ChatGPT "rapla/availability/dozent/" + dozentId;
+       return "rapla/availability"; 
    }
 
    @GET
@@ -211,23 +208,9 @@ public class AvailabilityPageGenerator
 
 	   StorageOperator operator = getFacade().getOperator();
 	   Map<String, Object> threadContextMap = operator.getThreadContextMap();
-//       try {
-//       generatedUrls = AdminMenuEntryDialog.loadUrlsFromXmlinOtherClass();
-//       }
-//       catch (Exception ex){
-//    	   System.out.println("Die gespeicherten URLs konnten nicht geladen werden");
-//       }
+
        try
        {
-//           if (generatedUrls.containsKey(request.getRequestURL().toString())) {
-//        	    System.out.println("Die URL ist in der Liste enthalten.");
-//        	} else {
-//        		System.out.println("Die URL ist nicht in der Liste enthalten.");
-//        		String message = "404 Website not available";
-//                write404(response, message);
-//                return;
-//        	}
-
            String username = "admin" ; //wird das benötigt?
            String filename = request.getParameter("file");
 

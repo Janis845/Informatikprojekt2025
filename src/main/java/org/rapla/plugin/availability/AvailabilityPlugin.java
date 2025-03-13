@@ -1,4 +1,4 @@
-package org.rapla.plugin.availability.menu;
+package org.rapla.plugin.availability;
 
 import org.rapla.entities.configuration.CalendarModelConfiguration;
 import org.rapla.entities.configuration.RaplaMap;
