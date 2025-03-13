@@ -16,6 +16,16 @@
         <active>true</active>
     </url>
     <url>
+        <name>Bonifacius, Lucas</name>
+        <link>http://localhost:8051/rapla/availability/4457524</link>
+        <active>true</active>
+    </url>
+    <url>
+        <name>Testnachname, Test</name>
+        <link>http://localhost:8051/rapla/availability/45256334</link>
+        <active>true</active>
+    </url>
+    <url>
         <name>Anders, Jan</name>
         <link>http://rapla.dhbw-heidenheim.de/rapla/availability/191941</link>
         <active>true</active>

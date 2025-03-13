@@ -1,4 +1,4 @@
-package org.rapla.plugin.availability;
+package org.rapla.plugin.availability.server;
 
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;

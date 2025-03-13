@@ -11,7 +11,7 @@ import org.rapla.framework.RaplaException;
 import org.rapla.framework.RaplaInitializationException;
 import org.rapla.framework.RaplaLocale;
 import org.rapla.logger.Logger;
-import org.rapla.plugin.availability.menu.AvailabilityPlugin;
+import org.rapla.plugin.availability.AvailabilityPlugin;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -62,7 +62,6 @@ public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidg
         writableFacade = facade.getRaplaFacade();
         overviewDialog = new UrlOverviewDialog(generatedUrls, this);
         initUI();
-        
         saveUrlsToPreferences();
         loadUrlsFromXml(); // Load URLs from XML
         

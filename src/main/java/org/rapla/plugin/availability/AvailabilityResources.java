@@ -6,7 +6,6 @@ import org.rapla.components.i18n.AbstractBundle;
 import org.rapla.components.i18n.BundleManager;
 import org.rapla.components.i18n.I18nBundle;
 import org.rapla.inject.Extension;
-import org.rapla.plugin.availability.menu.AvailabilityPlugin;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
