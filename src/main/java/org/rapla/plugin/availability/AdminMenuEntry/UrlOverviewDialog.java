@@ -152,14 +152,17 @@ public class UrlOverviewDialog implements RaplaWidget {
         
         JButton copyButton = new JButton("Kopieren");
         copyButton.addActionListener(e -> {
-            int selectedRow = urlTable.getSelectedRow();
-            if (selectedRow != -1) {
-                String url = (String) tableModel.getValueAt(selectedRow, 1);
-                Toolkit.getDefaultToolkit().getSystemClipboard()
-                    .setContents(new StringSelection(url), null);
-                JOptionPane.showMessageDialog(panel, 
-                    "URL wurde in die Zwischenablage kopiert!", 
-                    "Erfolg", JOptionPane.INFORMATION_MESSAGE);
+        	int selectedRow = urlTable.getSelectedRow();
+        	if (selectedRow != -1) {
+        	    int modelRow = urlTable.convertRowIndexToModel(selectedRow); // Wandle um!
+        	    String url = (String) tableModel.getValueAt(modelRow, 1); // Richtiger Index
+        	    Toolkit.getDefaultToolkit().getSystemClipboard()
+        	        .setContents(new StringSelection(url), null);
+        	    JOptionPane.showMessageDialog(panel,  
+        	        "URL wurde in die Zwischenablage kopiert!",  
+        	        "Erfolg", JOptionPane.INFORMATION_MESSAGE);
+        	
+
             } else {
                 JOptionPane.showMessageDialog(panel, 
                     "Bitte wählen Sie zuerst eine URL aus.", 
@@ -171,11 +174,12 @@ public class UrlOverviewDialog implements RaplaWidget {
         deleteButton.addActionListener(e -> {
             int selectedRow = urlTable.getSelectedRow();
             if (selectedRow != -1) {
-                int confirm = JOptionPane.showConfirmDialog(panel, 
-                    "Möchtest du diesen Eintrag wirklich löschen?", 
+                int modelRow = urlTable.convertRowIndexToModel(selectedRow); // View → Model
+                int confirm = JOptionPane.showConfirmDialog(panel,  
+                    "Möchtest du diesen Eintrag wirklich löschen?",  
                     "Löschen bestätigen", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    String url = (String) tableModel.getValueAt(selectedRow, 1);
+                    String url = (String) tableModel.getValueAt(modelRow, 1);
                     UrlEntry entry = urlEntries.get(url);
                     if (entry != null) {
                         entry.isDeleted = true;
@@ -184,11 +188,12 @@ public class UrlOverviewDialog implements RaplaWidget {
                     }
                 }
             } else {
-                JOptionPane.showMessageDialog(panel, 
-                    "Bitte wählen Sie zuerst eine URL aus.", 
+                JOptionPane.showMessageDialog(panel,  
+                    "Bitte wählen Sie zuerst eine URL aus.",  
                     "Fehler", JOptionPane.ERROR_MESSAGE);
             }
         });
+
 
         buttonPanel.add(copyButton);
         buttonPanel.add(deleteButton);

@@ -1,29 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <url-states>
     <url>
-        <name>Bormann, Uwe</name>
-        <link>http://test12345/rapla/availability/4422355</link>
-        <active>true</active>
-    </url>
-    <url>
-        <name>Hans, Test</name>
-        <link>http://localhost:8051/rapla/DHBW-Heidenheim/availability/854981</link>
-        <active>false</active>
-    </url>
-    <url>
-        <name>Bormann, Uwe</name>
-        <link>http://localhost:8051/rapla/availability/r4c11f17-a4e9-4544-bd27-31af7476f4d0</link>
-        <active>true</active>
-    </url>
-    <url>
-        <name>Bonifacius, Lucas</name>
-        <link>http://localhost:8051/rapla/availability/4457524</link>
-        <active>true</active>
-    </url>
-    <url>
         <name>Testnachname, Test</name>
         <link>http://localhost:8051/rapla/availability/45256334</link>
-        <active>true</active>
+        <active>false</active>
     </url>
     <url>
         <name>Anders, Jan</name>
