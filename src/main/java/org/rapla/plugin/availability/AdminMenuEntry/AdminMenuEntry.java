@@ -5,6 +5,7 @@ import org.rapla.client.PopupContext;
 import org.rapla.client.dialog.DialogInterface;
 import org.rapla.client.dialog.DialogUiFactoryInterface;
 import org.rapla.client.extensionpoints.AdminMenuExtension;
+import org.rapla.client.extensionpoints.ImportMenuExtension;
 import org.rapla.client.swing.RaplaGUIComponent;
 import org.rapla.client.swing.images.RaplaImages;
 import org.rapla.client.swing.toolkit.RaplaMenuItem;
@@ -21,8 +22,8 @@ import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-@Extension(provides = AdminMenuExtension.class, id = AdminMenuEntry.PLUGIN_ID)
-public class AdminMenuEntry extends RaplaGUIComponent implements AdminMenuExtension, ActionListener {
+@Extension(provides = ImportMenuExtension.class, id = AdminMenuEntry.PLUGIN_ID)
+public class AdminMenuEntry extends RaplaGUIComponent implements ImportMenuExtension, ActionListener {
     public static final String PLUGIN_ID = "org.rapla.plugin.availability";
     RaplaMenuItem item;
     String id = "editMenuEntry";
