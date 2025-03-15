@@ -5,8 +5,16 @@
         <link>http://example.com/availability?raplaId=kkkk</link>
     </url>
     <url>
+        <name>Lara Zuern</name>
+        <link>http://localhost:8051/rapla/availability/rfb4c0c9-39a8-457c-b3e0-db6996a70810</link>
+    </url>
+    <url>
         <name>aaa</name>
         <link>http://example.com/availability?raplaId=ssss</link>
+    </url>
+    <url>
+        <name>Magnus Kobold</name>
+        <link>http://localhost:8051/rapla/availability/rf79bfdc-4607-42fa-9895-f27ed67dfbd1</link>
     </url>
     <url>
         <name>aaaa</name>
