@@ -441,6 +441,9 @@ public class AvailabilityPageGenerator
 
            // Neue Reservierung erstellen
            Classification classification = facade.getDynamicType("event").newClassification(); //achtung vom Typ Veanstaltung, aber brauchen Typ Verfügbarkeit
+        
+           // Name des Events setzen
+           classification.setValue("name", "Verfügbar");
            Reservation event = facade.newReservation(classification, user);
 
            // Verfügbarkeiten durchlaufen und Appointments hinzufügen
