@@ -1321,20 +1321,20 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             
             for (Appointment c : collection)
             {
-            	Promise<Collection<Reservation>> query=getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null, c.getEnd(), Klasse filtern );
-            	Promise<Collection<Reservation>> results = query.thenApply((availabilties) -> {
-            	for(Reservation r : availabilties)
-            	{
-            		for (Appointment ra : r.getAppointment())
-            			
-            		{
-            			ra.getStart() <= appointment.getStartDate(null, getFacade(), user);
-            		}
-            		return ;
-            	}
-            	return availabilties;
+            	//Promise<Collection<Reservation>> query=getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null, c.getEnd(), Klasse filtern );
+            	//Promise<Collection<Reservation>> results = query.thenApply((availabilties) -> {
+            	//for(Reservation r : availabilties)
+            	//{
+            	//	for (Appointment ra : r.getAppointment())
+            	//		
+            	//	{
+            	//		ra.getStart() <= appointment.getStartDate(null, getFacade(), user);
+            	//	}
+            	//	return ;
+            	//}
+            	//return availabilties;
 
-            	});
+            	}
             	
             System.out.println(c.getReservation().getName(getLocale())); //hier dann prüfen ob Kon
             Reservation reservation = c.getReservation(); // ruft ab wann der Termin ist
