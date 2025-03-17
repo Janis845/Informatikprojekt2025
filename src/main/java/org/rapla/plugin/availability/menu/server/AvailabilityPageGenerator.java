@@ -425,7 +425,7 @@ public class AvailabilityPageGenerator
 
    }
    
-   //Variante 1: Method to receive Data and to save it -> JSON
+// Method to receive Data and to save it -> JSON
    
    @POST
    @Consumes("application/json")
@@ -436,9 +436,8 @@ public class AvailabilityPageGenerator
 
            // Benutzer und Allocatable aus dem System holen
            final User user = facade.getUser("admin");
-           String raplaID = "rfb4c0c9-39a8-457c-b3e0-db6996a70810";
-           Allocatable allocatable = facade.resolve(new ReferenceInfo<Allocatable>(raplaID, Allocatable.class));
-
+           String recievedRaplaID = null;
+          
            // Neue Reservierung erstellen
            Classification classification = facade.getDynamicType("event").newClassification(); //achtung vom Typ Veanstaltung, aber brauchen Typ Verfügbarkeit
         
@@ -454,22 +453,14 @@ public class AvailabilityPageGenerator
                String startStr = (String) availability.get("starttime");
                String endStr = (String) availability.get("endtime");
                String dateStr = (String) availability.get("date");
+               recievedRaplaID = (String) availability.get("raplaID");
 
                // Zeitformat anpassen (z. B. ISO 8601: "2025-03-15 09:00")
                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
                Date start = dateFormat.parse(dateStr +" " + startStr);
                Date end = dateFormat.parse(dateStr +" " +endStr);
-               
-               /*
-               System.out.println("Parsed Startzeit: " + start);
-               System.out.println("Parsed Endzeit: " + end);
-               System.out.println("Server-Zeitzone: " + TimeZone.getDefault().getID()); 
-               */
-               
-               //Die Zeitzone ist korrekt gesetzt,vor dem Speichern richtig.
-               //Der Fehler passiert nach dem Speichern oder bei der Anzeige in Rapla.
-               
+                        
                
             // in Europe/Berlin interpretieren
                ZonedDateTime startBerlin = start.toInstant().atZone(ZoneId.of("Europe/Berlin")).plusHours(1);
@@ -482,15 +473,14 @@ public class AvailabilityPageGenerator
                Date startDate = Date.from(startUTC.toInstant());
                Date endDate = Date.from(endUTC.toInstant());
                
-               /*
-               System.out.println("Stored Startzeit (Berlin->UTC): " + startUTC);
-               System.out.println("Stored Endzeit (Berlin->UTC): " + endUTC);
-               */
-               
             // Appointment speichern
                Appointment appointment = facade.newAppointmentWithUser(startDate, endDate, user);
                event.addAppointment(appointment);
            }
+           
+           Allocatable allocatable = facade.resolve(new ReferenceInfo<Allocatable>(recievedRaplaID, Allocatable.class));
+  
+
 
            // Allocatable (z. B. Raum) zuweisen
            event.addAllocatable(allocatable);

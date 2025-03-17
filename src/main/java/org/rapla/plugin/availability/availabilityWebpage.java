@@ -66,6 +66,8 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
     	out.println("    <h2>Dozenten Verfügbarkeit</h2>");
     	out.println("    <label for='date'>Datum:</label>");
     	out.println("    <input type='date' id='date' name='date' required>");
+    	out.println("    <label for='raplaID'>RaplaID:</label>");
+    	out.println("    <input type='raplaID' id='raplaID' name='raplaID' required>");
     	out.println("    <label for='starttime'>Startzeit:</label>");
     	out.println("    <input type='time' id='starttime' name='starttime' required>");
     	out.println("    <label for='endtime'>Endzeit:</label>");
@@ -97,25 +99,26 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
 
     	out.println("    function addAvailability() {");
     	out.println("      let date = document.getElementById('date').value;");
+    	out.println("      let raplaID = document.getElementById('raplaID').value;");
     	out.println("      let starttime = document.getElementById('starttime').value;");
     	out.println("      let endtime = document.getElementById('endtime').value;");
     	out.println("      let recurrence = document.getElementById('recurrence').value;");
     	out.println("      let weeks = parseInt(document.getElementById('weeks').value) || 1;");
 
-    	out.println("      if (!date || !starttime || !endtime) {");
+    	out.println("      if (!date || !starttime || !endtime || !raplaID) {");
     	out.println("        alert('Bitte alle Felder ausfüllen!');");
     	out.println("        return;");
     	out.println("      }");
 
-    	out.println("      console.log('Neue Verfügbarkeit hinzugefügt:', { date, starttime, endtime, recurrence, weeks });");
+    	out.println("      console.log('Neue Verfügbarkeit hinzugefügt:', { date, starttime, endtime, recurrence, weeks, raplaID });");
 
     	out.println("      if (recurrence === 'once') {");
-    	out.println("        availabilities.push({ date, starttime, endtime });");
+    	out.println("        availabilities.push({ date, starttime, endtime, raplaID });");
     	out.println("      } else {");
     	out.println("        for (let i = 0; i < weeks; i++) {");
     	out.println("          let nextDate = new Date(date);");
     	out.println("          nextDate.setDate(nextDate.getDate() + (7 * i));");
-    	out.println("          availabilities.push({ date: nextDate.toISOString().split('T')[0], starttime, endtime });");
+    	out.println("          availabilities.push({ date: nextDate.toISOString().split('T')[0], starttime, endtime, raplaID });");
     	out.println("        }");
     	out.println("      }");
 
@@ -127,7 +130,7 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
     	out.println("      list.innerHTML = '';");
     	out.println("      availabilities.forEach((entry, index) => {");
     	out.println("        let li = document.createElement('li');");
-    	out.println("        li.innerHTML = `${entry.date} von ${entry.starttime} bis ${entry.endtime} <button class='delete-btn' onclick='removeAvailability(${index})'>X</button>`;");
+    	out.println("        li.innerHTML = `${entry.date} von ${entry.starttime} bis ${entry.endtime} für ${entry.raplaID} <button class='delete-btn' onclick='removeAvailability(${index})'>X</button>`;");
     	out.println("        list.appendChild(li);");
     	out.println("      });");
     	out.println("    }");
