@@ -1319,6 +1319,23 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             
             for (Appointment c : collection)
             {
+            	Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null, c.getEnd(), null);
+
+            	Promise<Collection<Reservation>> results = query.thenApply((reservation) -> {
+
+            	for(Reservation r : reservation)
+            	{
+
+            		String name = r.getName(getLocale());
+
+            		String classType = r.getClassification().getType().getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
+
+            		System.out.println("r ("+name+" , " + classType +")");
+            	}
+
+            	return reservation;
+
+            	});
             	System.out.println(c.getReservation().getName(getLocale())); //hier dann prüfen ob Kon
             	Reservation reservation = c.getReservation(); // ruft ab wann der Termin ist
             	// Der Type der Veranstaltung
@@ -2102,7 +2119,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             
             //Hier können Sie die Erweiterung der Klasse AllocationRendering nutzen, um ein anderen Icon für Verfügbarkeitsüberschneidung anzuzeigen.
             
-            if (allocBinding.isavailabilityConflictCount == true)
+            if (allocBinding.isavailabilityConflictCount == true)//diese Bedingung muss angepasst werden
             {
             	
             	System.out.println("if Abfrage anderes Icon");
