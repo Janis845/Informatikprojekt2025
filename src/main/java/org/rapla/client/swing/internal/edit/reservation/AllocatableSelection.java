@@ -1312,45 +1312,28 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         AllocationRendering result = new AllocationRendering();
         String annotation = allocatable.getAnnotation(ResourceAnnotations.KEY_CONFLICT_CREATION);
         boolean holdBackConflicts = annotation != null && annotation.equals(ResourceAnnotations.VALUE_CONFLICT_CREATION_IGNORE);
-        
         for (int i = 0; i < appointments.length; i++)
-        {	// appointment enthält alle termine der geöffnetetn Veranstaltung
+        {
             Appointment appointment = appointments[i];
-            //collection enthält alle termine, die min einen konflikt mit der ressource allcotable haben
             Collection<Appointment> collection = allocatableBindings.get(allocatable.getReference()); //Collection ausgeben
             
             for (Appointment c : collection)
             {
-            	//Promise<Collection<Reservation>> query=getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null, c.getEnd(), Klasse filtern );
-            	//Promise<Collection<Reservation>> results = query.thenApply((availabilties) -> {
-            	//for(Reservation r : availabilties)
-            	//{
-            	//	for (Appointment ra : r.getAppointment())
-            	//		
-            	//	{
-            	//		ra.getStart() <= appointment.getStartDate(null, getFacade(), user);
-            	//	}
-            	//	return ;
-            	//}
-            	//return availabilties;
-
-            	}
+            	System.out.println(c.getReservation().getName(getLocale())); //hier dann prüfen ob Kon
+            	Reservation reservation = c.getReservation(); // ruft ab wann der Termin ist
+            	// Der Type der Veranstaltung
+            	DynamicType type = reservation.getClassification().getType(); // ruft Veranstaltungstyp ab
             	
-            System.out.println(c.getReservation().getName(getLocale())); //hier dann prüfen ob Kon
-            Reservation reservation = c.getReservation(); // ruft ab wann der Termin ist
-            // Der Type der Veranstaltung
-            DynamicType type = reservation.getClassification().getType(); // ruft Veranstaltungstyp ab
+            	String classificationtype = type.getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE); // speicheurng als String
             	
-            String classificationtype = type.getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE); // speicheurng als String
+            	System.out.println("Zeile1384 Reservation: " + reservation);
+            	System.out.println("Zeile1385 Type: " + type);
+            	System.out.println("Zeile13865 Type: " + classificationtype);
             	
-            System.out.println("Zeile1384 Reservation: " + reservation);
-            System.out.println("Zeile1385 Type: " + type);
-            System.out.println("Zeile13865 Type: " + classificationtype);
-            	
-            //hier die Logik einfügen, die ermittelt, dass ausschließlich Überschneidungen mit Verfügbarkeiten zum Konflikt geführt haben
+            	//hier die Logik einfügen, die ermittelt, dass ausschließlich Überschneidungen mit Verfügbarkeiten zum Konflikt geführt haben
             	
             	
-            boolean isAvailabilityConflict = classificationtype.equals("availability"); // neu wird true wenn Typ Availability
+            	boolean isAvailabilityConflict = classificationtype.equals("availability"); // neu wird true wenn Typ Availability
             	
             	if (isAvailabilityConflict == true)
             		{
@@ -2117,7 +2100,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             
             
             
-            //Hier können die Erweiterung der Klasse AllocationRendering nutzen, um ein anderen Icon für Verfügbarkeitsüberschneidung anzuzeigen.
+            //Hier können Sie die Erweiterung der Klasse AllocationRendering nutzen, um ein anderen Icon für Verfügbarkeitsüberschneidung anzuzeigen.
             
             if (allocBinding.isavailabilityConflictCount == true)
             {
@@ -2125,7 +2108,6 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             	System.out.println("if Abfrage anderes Icon");
             	return availabilityIcon;
             }
-            
             
             else
             {

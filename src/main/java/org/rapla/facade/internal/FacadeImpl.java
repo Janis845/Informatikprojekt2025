@@ -590,17 +590,8 @@ public class FacadeImpl implements RaplaFacade {
 
 					Collection<Appointment> conflictingAppointments = appointmentMapEntry.getValue();
 					if ( !conflictingAppointments.isEmpty()) {
-						
-						for (Appointment app: conflictingAppointments)
-						{
-							String classType = app.getReservation().getClassification().getType().getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
-							if(classType.equals("reservation"))
-							{
-								Appointment originalAppointment = appointmentMapEntry.getKey();
-								map.computeIfAbsent(alloc, (s)->new HashSet<>()).add(originalAppointment);
-								break;
-							}
-						}
+						Appointment originalAppointment = appointmentMapEntry.getKey();
+						map.computeIfAbsent(alloc, (s)->new HashSet<>()).add(originalAppointment);
 					}
 				}
 			}
@@ -820,6 +811,15 @@ public class FacadeImpl implements RaplaFacade {
 			dynamicType.addAttribute(createStringAttribute("surname", "surname"));
 			dynamicType.addAttribute(createStringAttribute("firstname", "firstname"));
 			dynamicType.addAttribute(createStringAttribute("email", "email"));
+			
+			
+			
+			dynamicType.addAttribute(createStringAttribute("Studiengang", "Studiengang")); //hinzugefügt am 25.02.25
+			
+			
+			
+			
+			
 			dynamicType.setAnnotation(DynamicTypeAnnotations.KEY_NAME_FORMAT, "{surname} {firstname}");
 			dynamicType.setAnnotation(DynamicTypeAnnotations.KEY_COLORS, null);
             addDefaultResourcePermissions(dynamicType);
