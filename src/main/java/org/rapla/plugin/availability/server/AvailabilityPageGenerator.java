@@ -81,6 +81,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /******* USAGE: ************
 * ReadOnly calendarview view.
@@ -183,10 +184,13 @@ public class AvailabilityPageGenerator
 
 	   try {
 	        // System-Preferences laden (als Lesezugriff, da hier keine Änderung vorgenommen wird)
-	        String storedUrls = facade.getSystemPreferences().getEntryAsString(AvailabilityPlugin.URLS, "");
+	        String storedUrls = facade.getSystemPreferences().getEntryAsString(AvailabilityPlugin.ID, "");
+	        String serverDomain = facade.getSystemPreferences().getEntryAsString(AvailabilityPlugin.SERVER_DOMAIN, "");
 	        List<String> urlList = new ArrayList<>();
 	        if (!storedUrls.isEmpty()) {
-	            urlList = new ArrayList<>(Arrays.asList(storedUrls.split(",")));
+	            urlList = Arrays.stream(storedUrls.split(","))
+	                            .map(id -> serverDomain + "/rapla/availability/" + id)
+	                            .collect(Collectors.toList());
 	        }
 	        
 	        String currentUrl = request.getRequestURL().toString();

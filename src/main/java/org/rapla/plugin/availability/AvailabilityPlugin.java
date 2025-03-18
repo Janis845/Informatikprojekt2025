@@ -10,6 +10,6 @@ public class AvailabilityPlugin
     public static final String HTML_EXPORT= PLUGIN_ENTRY + ".selected";
     public static final String PLUGIN_ID ="org.rapla.plugin.availability";
     public static final TypedComponentRole<String> SERVER_DOMAIN = new TypedComponentRole<>(PLUGIN_ID + "." + "ServerDomain");
-    public static final TypedComponentRole<String> URLS = new TypedComponentRole<>(PLUGIN_ID + "."+ "Urls");
+    public static final TypedComponentRole<String> ID = new TypedComponentRole<>(PLUGIN_ID + "."+ "IDs");
 
 }

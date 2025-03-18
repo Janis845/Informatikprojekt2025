@@ -1,6 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <url-states>
     <url>
+        <name>test1742307802208</name>
+        <link>http://localhost:8051rapla/availability111</link>
+        <active>true</active>
+    </url>
+    <url>
+        <name>test1742307269388</name>
+        <link>http://localhost:8051rapla/availability12361</link>
+        <active>true</active>
+    </url>
+    <url>
+        <name>test1742307779549</name>
+        <link>http://localhost:8051rapla/availability1517151</link>
+        <active>true</active>
+    </url>
+    <url>
+        <name>test1742307143725</name>
+        <link>http://localhost:8051rapla/availability12345</link>
+        <active>true</active>
+    </url>
+    <url>
+        <name>test1742307180675</name>
+        <link>http://localhost:8051rapla/availability25441234</link>
+        <active>true</active>
+    </url>
+    <url>
+        <name>test1742307549368</name>
+        <link>http://localhost:8051rapla/availability1266114</link>
+        <active>true</active>
+    </url>
+    <url>
+        <name>test1742306921548</name>
+        <link>http://localhost:8051rapla/availability1235432</link>
+        <active>true</active>
+    </url>
+    <url>
         <name>Testnachname, Test</name>
         <link>http://localhost:8051/rapla/availability/45256334</link>
         <active>false</active>
