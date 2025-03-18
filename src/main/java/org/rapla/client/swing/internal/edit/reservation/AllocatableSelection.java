@@ -1317,48 +1317,9 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             Appointment appointment = appointments[i];
             Collection<Appointment> collection = allocatableBindings.get(allocatable.getReference()); //Collection ausgeben
             
-            for (Appointment c : collection)
-            {
-            	Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null, c.getEnd(), null);
-
-            	Promise<Collection<Reservation>> results = query.thenApply((reservation) -> {
-
-            	for(Reservation r : reservation)
-            	{
-
-            		String name = r.getName(getLocale());
-
-            		String classType = r.getClassification().getType().getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
-
-            		System.out.println("r ("+name+" , " + classType +")");
-            	}
-
-            	return reservation;
-
-            	});
-            	System.out.println(c.getReservation().getName(getLocale())); //hier dann prüfen ob Kon
-            	Reservation reservation = c.getReservation(); // ruft ab wann der Termin ist
-            	// Der Type der Veranstaltung
-            	DynamicType type = reservation.getClassification().getType(); // ruft Veranstaltungstyp ab
-            	
-            	String classificationtype = type.getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE); // speicheurng als String
-            	
-            	System.out.println("Zeile1384 Reservation: " + reservation);
-            	System.out.println("Zeile1385 Type: " + type);
-            	System.out.println("Zeile13865 Type: " + classificationtype);
-            	
-            	//hier die Logik einfügen, die ermittelt, dass ausschließlich Überschneidungen mit Verfügbarkeiten zum Konflikt geführt haben
+            
             	
             	
-            	boolean isAvailabilityConflict = classificationtype.equals("availability"); // neu wird true wenn Typ Availability
-            	
-            	if (isAvailabilityConflict == true)
-            		{
-            			result.isavailabilityConflictCount = true;
-            			return result;
-            			
-            		}
-            }
             
             boolean conflictingAppointments = collection != null && collection.contains(appointment);
             result.conflictingAppointments[i] = false;
@@ -1396,6 +1357,43 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                 }
                 result.permissionConflictCount++;
             }
+            
+            Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null, appointment.getEnd(), null);
+
+        	Promise<Boolean> overlapAvailability = query.thenApply((reservations) -> {
+
+        		for(Reservation r : reservations)
+        		{
+
+        			String name = r.getName(getLocale());
+
+        			String classType = r.getClassification().getType().getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
+
+        			System.out.println("r ("+name+" , " + classType +")");
+        			
+        			if (classType.equals("availability"))
+        			{
+        				
+        				for (Appointment a : r.getAppointments())
+        				{
+        					if(a.getStart().before(appointment.getStart()) && a.getEnd().after(appointment.getEnd()))
+        					{
+        						return true;
+        					}
+         					
+        				}
+        				
+        			}
+        		}
+
+        	return false;
+
+        	});
+        	
+        //result.availabilityConflicts[i] = overlapAvailability;
+        
+        	
+        	
         }
         return result;
     }
