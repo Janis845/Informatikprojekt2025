@@ -1,7 +1,10 @@
 package org.rapla.plugin.availability.AdminMenuEntry;
 
 import org.rapla.client.RaplaWidget;
+import org.rapla.entities.EntityNotFoundException;
 import org.rapla.entities.configuration.Preferences;
+import org.rapla.entities.domain.Allocatable;
+import org.rapla.entities.storage.ReferenceInfo;
 import org.rapla.facade.RaplaFacade;
 import org.rapla.framework.RaplaException;
 import org.rapla.plugin.availability.AvailabilityPlugin;
@@ -445,6 +448,13 @@ public class UrlOverviewDialog implements RaplaWidget {
 //    }
 
     public String getNameById(String id) {
+        try {
+			Allocatable allocatable = writableFacade.resolve(new ReferenceInfo<Allocatable>(id, Allocatable.class));
+		} catch (EntityNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
     	return "test" + System.currentTimeMillis();
     }
     
