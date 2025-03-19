@@ -450,12 +450,13 @@ public class UrlOverviewDialog implements RaplaWidget {
     public String getNameById(String id) {
         try {
 			Allocatable allocatable = writableFacade.resolve(new ReferenceInfo<Allocatable>(id, Allocatable.class));
+			 return allocatable.getName(null);
 		} catch (EntityNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return "Unbekannt";
 		}
-        
-    	return "test" + System.currentTimeMillis();
+       
     }
     
     public void updateRaplaID(List<String> newID) {

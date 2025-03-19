@@ -19,33 +19,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
 
 import org.rapla.entities.configuration.Preferences;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+
 
 public class AdminMenuEntryDialog extends RaplaGUIComponent implements RaplaWidget {
     private JPanel panel;
-    private JTextField firstNameField;
-    private JTextField lastNameField;
     private JTextField raplaIdField;
     private JButton generateButton;
     private JTextField urlField;
