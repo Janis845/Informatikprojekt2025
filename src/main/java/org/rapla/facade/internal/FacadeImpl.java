@@ -590,8 +590,17 @@ public class FacadeImpl implements RaplaFacade {
 
 					Collection<Appointment> conflictingAppointments = appointmentMapEntry.getValue();
 					if ( !conflictingAppointments.isEmpty()) {
-						Appointment originalAppointment = appointmentMapEntry.getKey();
-						map.computeIfAbsent(alloc, (s)->new HashSet<>()).add(originalAppointment);
+						
+						for (Appointment app: conflictingAppointments)
+						{
+							String classType = app.getReservation().getClassification().getType().getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
+							if(classType.equals("reservation"))
+							{
+								Appointment originalAppointment = appointmentMapEntry.getKey();
+								map.computeIfAbsent(alloc, (s)->new HashSet<>()).add(originalAppointment);
+								break;
+							}
+						}
 					}
 				}
 			}

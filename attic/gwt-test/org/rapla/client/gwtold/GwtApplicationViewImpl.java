@@ -87,7 +87,7 @@ public class GwtApplicationViewImpl implements ApplicationView<IsWidget>
             navbar.setPosition(NavbarPosition.FIXED_TOP);
             root.add(navbar);
             final Div spacerDiv = new Div();
-            spacerDiv.getElement().getStyle().setWidth(100, Unit.PCT);
+            spacerDiv.getElement().getStyle().setWidth(1000, Unit.PCT);
             spacerDiv.getElement().getStyle().setHeight(50, Unit.PX);
             root.add(spacerDiv);
         }

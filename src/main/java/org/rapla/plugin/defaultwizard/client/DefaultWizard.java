@@ -104,6 +104,19 @@ import java.util.List;
                     eventTypes.add(type);
                 }
             }
+            
+            // TODO Availability
+            // Derzeit werden Veranstaltungstypen und Verfügbarkeitstypen in einem Untermenü angezeigt.
+            types = raplaFacade.getDynamicTypes(DynamicTypeAnnotations.VALUE_CLASSIFICATION_TYPE_AVAILABILITY);
+            for (DynamicType type : types)
+            {
+                if (permissionController.canCreate(type, user))
+                {
+                    eventTypes.add(type);
+                }
+            }
+            
+            
         }
         catch (RaplaException e)
         {

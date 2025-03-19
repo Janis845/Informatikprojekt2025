@@ -22,6 +22,7 @@ import org.rapla.entities.domain.Allocatable;
 import org.rapla.entities.domain.Appointment;
 import org.rapla.entities.domain.RequestStatus;
 import org.rapla.entities.domain.Reservation;
+import org.rapla.entities.dynamictype.DynamicTypeAnnotations;
 import org.rapla.plugin.abstractcalendar.RaplaBlock;
 import org.rapla.plugin.abstractcalendar.RaplaBuilder;
 
@@ -172,8 +173,18 @@ public class SwingRaplaBlock extends RaplaBlock implements SwingBlock {
 
         public void paint(Graphics g) {
             Dimension dim = getSize();
-            paint(g, dim.width, dim.height);
+            //Zeile 177 bis 184 eingefügt
+            // TODO: Availability
+            final Reservation reservation = getReservation();
+            final String classtype = reservation.getClassification().getType().getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
+            
+            if(classtype.equals(DynamicTypeAnnotations.VALUE_CLASSIFICATION_TYPE_AVAILABILITY))
+            	paint(g, 100, dim.height); //100 war Standard zu 1000 geändert und 10 --> keine Änderung 
+            else
+            	paint(g, 100, dim.height); //dim.width mit 100/80 ersetzt
         }
+        
+        //hier die Bereite zu ändern wirkt sich nur auf die Breite des Farbbalkens aus
 
         public void paint(Graphics g, int width, int height) {
             int alpha = g.getColor().getAlpha();

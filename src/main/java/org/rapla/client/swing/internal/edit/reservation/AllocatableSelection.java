@@ -64,6 +64,7 @@ import org.rapla.framework.RaplaLocale;
 import org.rapla.logger.Logger;
 import org.rapla.scheduler.Promise;
 import org.rapla.scheduler.ResolvedPromise;
+import org.rapla.scheduler.sync.SynchronizedCompletablePromise;
 import org.rapla.storage.PermissionController;
 
 import javax.inject.Inject;
@@ -169,9 +170,15 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
 
     Map<ReferenceInfo<Allocatable>, Collection<Appointment>> allocatableBindings = new HashMap<>();
     //	Map<Appointment,Collection<Allocatable>> appointmentMap	= new HashMap<Appointment,Collection<Allocatable>>();
-    Appointment[] appointments;
+    Appointment[] appointments;    
+    
     String[] appointmentStrings;
     String[] appointmentIndexStrings;
+    
+    
+   
+    
+    
 
     ModifiableCalendarState calendarModel;
     EventListenerList listenerList = new EventListenerList();
@@ -511,6 +518,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
     }
 
     private boolean bWorkaround = false; // Workaround for Bug ID  4480264 on developer.java.sun.com
+	public Classification type;
 
     public void setReservation(Collection<Reservation> mutableReservation, Collection<Reservation> originalReservations) throws RaplaException
     {
@@ -1270,21 +1278,44 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
     class AllocationRendering
     {
         boolean[] conflictingAppointments = new boolean[appointments.length]; // stores the temp conflicting appointments
+        boolean[] availabilityConflicts = new boolean[appointments.length]; //neu
+        
+        
+        
         int conflictCount = 0; // temp value for conflicts
         int permissionConflictCount = 0; // temp value for conflicts that are the result of denied permission
-        RequestStatus requestStatus;
+        
+        
+        boolean isavailabilityConflictCount = false; //neu
+        
+        RequestStatus requestStatus;  
+         
+        
     }
+    
+    
+         
+    
+    //String classificationtype = ""; // hinzugefügt 06.03.25    
 
     // calculates the number of conflicting appointments for this allocatable
     private AllocationRendering calcConflictingAppointments(Allocatable allocatable)
     {
+    	System.out.println("Z.1310" + allocatable.getId());
+    	
+    	
         AllocationRendering result = new AllocationRendering();
         String annotation = allocatable.getAnnotation(ResourceAnnotations.KEY_CONFLICT_CREATION);
         boolean holdBackConflicts = annotation != null && annotation.equals(ResourceAnnotations.VALUE_CONFLICT_CREATION_IGNORE);
         for (int i = 0; i < appointments.length; i++)
         {
             Appointment appointment = appointments[i];
-            Collection<Appointment> collection = allocatableBindings.get(allocatable.getReference());
+            Collection<Appointment> collection = allocatableBindings.get(allocatable.getReference()); //Collection ausgeben
+            
+            
+            	
+            	
+            
             boolean conflictingAppointments = collection != null && collection.contains(appointment);
             result.conflictingAppointments[i] = false;
             final RequestStatus status = appointment.getReservation().getRequestStatus(allocatable);
@@ -1293,14 +1324,30 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                     result.requestStatus = status;
                 }
             }
+            
             if (conflictingAppointments)
             {
-                if (!holdBackConflicts)
+            	                
+            	//von Bonifacius
+            	
+            	
+            	
+            	//System.out.println("Zeile1356 konflikt mit Verfügb.: " + isAvailabilityConflict);
+            	           	
+            	//System.out.println("Zeile1319 Classification Type: " + classificationtype);
+
+            	
+            	if (!holdBackConflicts)
                 {
                     result.conflictingAppointments[i] = true;
                     result.conflictCount++;
                 }
             }
+            
+            
+            
+            
+            
             else if (!isAllowed(allocatable, appointment))
             {
                 if (!holdBackConflicts)
@@ -1310,6 +1357,69 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                 }
                 result.permissionConflictCount++;
             }
+            
+            
+            //asynchrone Abfrage, überprüft ob Verfügbarkeit und Veranstaltung Überlappung hat, wenn ja Speicherung von true in overlapAvailability
+            
+            Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, appointment.getStart() , appointment.getEnd(), null);
+            
+           
+        	Promise<Boolean> overlapAvailability = query.thenApply((reservations) -> {
+
+        		for(Reservation r : reservations)
+        		{
+
+        			String name = r.getName(getLocale());
+
+        			String classType = r.getClassification().getType().getAnnotation(DynamicTypeAnnotations.KEY_CLASSIFICATION_TYPE);
+
+        			System.out.println("r ("+name+" , " + classType +")");
+        			
+        			if (classType.equals("availability"))
+        			{
+        				
+        				for (Appointment a : r.getAppointments())
+        				{
+        					
+        					//kleiner gleich durch before oder equals,  <=
+        					if((a.getStart().before(appointment.getStart()) || a.getStart().equals(appointment.getStart())) && (a.getEnd().after(appointment.getEnd()) || a.getEnd().equals(appointment.getEnd())))
+        					
+        					{
+        						return true;
+        					}
+         					
+        				}
+        				
+        			}
+        		}
+
+        	return false;
+
+        	});
+        	
+        	try
+        	{
+        	    Boolean hasOverlapAvailability = SynchronizedCompletablePromise.waitFor(overlapAvailability, -1, getLogger());
+        	    result.availabilityConflicts[i] = hasOverlapAvailability;
+        	    
+        	    System.out.println("Line 1396" + hasOverlapAvailability);
+        	    
+        	}
+        	catch (Exception e)
+        	{               
+        	}
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        //result.availabilityConflicts[i] = overlapAvailability;
+        
+        	
+        	
         }
         return result;
     }
@@ -1985,6 +2095,8 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         Icon personNotAlwaysAvailableIcon;
         Icon forbiddenIcon;
         Icon requestIcon;
+        Icon availabilityIcon; //neu 08.03.2025
+        
         boolean checkRestrictions;
 
         public AllocationTreeCellRenderer(boolean checkRestrictions)
@@ -1996,6 +2108,9 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             notAlwaysAvailableIcon = RaplaImages.getIcon(i18n.getIcon("icon.allocatable_not_always_available"));
             personIcon = RaplaImages.getIcon(i18n.getIcon("icon.tree.persons"));
             personNotAlwaysAvailableIcon = RaplaImages.getIcon(i18n.getIcon("icon.tree.person_not_always_available"));
+            
+            availabilityIcon = RaplaImages.getIcon(i18n.getIcon("icon.availability"));// neu 08.03.2025
+            
             this.checkRestrictions = checkRestrictions;
             setOpenIcon(RaplaImages.getIcon(i18n.getIcon("icon.folder")));
             setClosedIcon(RaplaImages.getIcon(i18n.getIcon("icon.folder")));
@@ -2023,9 +2138,41 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             Date today = getQuery().today();
 
             AllocationRendering allocBinding = calcConflictingAppointments(allocatable);
+            
+            
+            
+            //Hier können Sie die Erweiterung der Klasse AllocationRendering nutzen, um ein anderen Icon für Verfügbarkeitsüberschneidung anzuzeigen.
+            
+               
+            
+            
             if (allocBinding.conflictCount == 0)
             {
+            	
+            	boolean overlapAvailabilityAllAppointments = true;
+            	System.out.println("Line 2141");
+            	
+            	for(boolean b : allocBinding.availabilityConflicts)
+            		{
+            			System.out.println("Line 2145 for Schleife");
+            			overlapAvailabilityAllAppointments = overlapAvailabilityAllAppointments && b;
+            		}
+            	
+            	
+            	System.out.println("overlap" + overlapAvailabilityAllAppointments);
+            	
+            	if(overlapAvailabilityAllAppointments == true)
+            		{
+            		
+            			System.out.println("In If für neues ICON");
+            			return availabilityIcon;
+            		}
+            	else
+            	{
+            	
                 return getAvailableIcon(allocatable);
+                
+            	}
             }
             else if (allocBinding.conflictCount == appointments.length)
             {
@@ -2041,14 +2188,23 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                     }
                 }
                 else
-                {
-                    return conflictIcon;
+                {	
+                	
+                	
+					
+                      return conflictIcon;
+                    
+                    
+                	
+                	
                 }
             }
+            
             else if (!checkRestrictions)
             {
                 return getNotAlwaysAvailableIcon(allocatable);
             }
+            
 
             if (checkRestrictions && permissionController.isRequestOnly( allocatable, user,  today))
             {
@@ -2204,17 +2360,13 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
 
         String command;
 
-        private final TreeFactory treeFactory;
-
         public AllocatableAction(TreeFactory treeFactory)
         {
-            this.treeFactory = treeFactory;
         }
 
         AllocatableAction(String command, TreeFactory treeFactory)
         {
             this.command = command;
-            this.treeFactory = treeFactory;
             if (command.equals("add"))
             {
                 putValue(NAME, getString("add"));
