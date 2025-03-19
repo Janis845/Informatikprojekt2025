@@ -436,11 +436,10 @@ public class AvailabilityPageGenerator
 
            // Benutzer und Allocatable aus dem System holen
            final User user = facade.getUser("admin");
-           String recievedRaplaID = null;
+           String recievedRaplaID = null; 
           
            // Neue Reservierung erstellen
-           Classification classification = facade.getDynamicType("event").newClassification(); //achtung vom Typ Veanstaltung, aber brauchen Typ Verfügbarkeit
-        
+           Classification classification = facade.getDynamicType("availability").newClassification(); //achtung vom Typ Veanstaltung, aber brauchen Typ Verfügbarkeit
            // Name des Events setzen
            classification.setValue("name", "Verfügbar");
            Reservation event = facade.newReservation(classification, user);
