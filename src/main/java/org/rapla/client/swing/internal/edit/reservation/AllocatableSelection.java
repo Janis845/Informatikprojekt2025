@@ -1343,6 +1343,11 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                     result.conflictCount++;
                 }
             }
+            
+            
+            
+            
+            
             else if (!isAllowed(allocatable, appointment))
             {
                 if (!holdBackConflicts)
@@ -1376,7 +1381,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         				for (Appointment a : r.getAppointments())
         				{
         					
-        					//kleiner gleich durch before oder equals
+        					//kleiner gleich durch before oder equals,  <=
         					if((a.getStart().before(appointment.getStart()) || a.getStart().equals(appointment.getStart())) && (a.getEnd().after(appointment.getEnd()) || a.getEnd().equals(appointment.getEnd())))
         					
         					{
