@@ -66,8 +66,12 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
     	out.println("    <h2>Dozenten Verfügbarkeit</h2>");
     	out.println("    <label for='date'>Datum:</label>");
     	out.println("    <input type='date' id='date' name='date' required>");
-    	out.println("    <label for='raplaID'>RaplaID:</label>");
-    	out.println("    <input type='raplaID' id='raplaID' name='raplaID' required>");
+    	out.println("    <label for='raplaID' style='display:none;'>RaplaID:</label>");
+    	out.println("    <input type='hidden' id='raplaID' name='raplaID' required>");
+    	out.println("    <script>");
+    	out.println("      const urlParts = window.location.href.split('/');");
+    	out.println("      document.getElementById('raplaID').value = urlParts[urlParts.length - 1];");
+    	out.println("    </script>");
     	out.println("    <label for='starttime'>Startzeit:</label>");
     	out.println("    <input type='time' id='starttime' name='starttime' required>");
     	out.println("    <label for='endtime'>Endzeit:</label>");
@@ -130,7 +134,7 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
     	out.println("      list.innerHTML = '';");
     	out.println("      availabilities.forEach((entry, index) => {");
     	out.println("        let li = document.createElement('li');");
-    	out.println("        li.innerHTML = `${entry.date} von ${entry.starttime} bis ${entry.endtime} für ${entry.raplaID} <button class='delete-btn' onclick='removeAvailability(${index})'>X</button>`;");
+    	out.println("        li.innerHTML = `${entry.date} von ${entry.starttime} bis ${entry.endtime} <button class='delete-btn' onclick='removeAvailability(${index})'>X</button>`;");
     	out.println("        list.appendChild(li);");
     	out.println("      });");
     	out.println("    }");
@@ -160,7 +164,6 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
     	out.println("        alert('Fehler beim Absenden: ' + error);");
     	out.println("      });");
     	out.println("    });");
-
     	out.println("  </script>");
     	out.println("</body>");
     	out.println("</html>");

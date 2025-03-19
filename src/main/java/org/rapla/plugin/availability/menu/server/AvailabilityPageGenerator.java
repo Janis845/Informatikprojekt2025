@@ -439,7 +439,7 @@ public class AvailabilityPageGenerator
            String recievedRaplaID = null; 
           
            // Neue Reservierung erstellen
-           Classification classification = facade.getDynamicType("availability").newClassification(); //achtung vom Typ Veanstaltung, aber brauchen Typ Verfügbarkeit
+           Classification classification = facade.getDynamicType("availability1").newClassification(); //achtung vom Typ Veanstaltung, aber brauchen Typ Verfügbarkeit
            // Name des Events setzen
            classification.setValue("name", "Verfügbar");
            Reservation event = facade.newReservation(classification, user);
@@ -460,17 +460,43 @@ public class AvailabilityPageGenerator
                Date start = dateFormat.parse(dateStr +" " + startStr);
                Date end = dateFormat.parse(dateStr +" " +endStr);
                         
-               
-            // in Europe/Berlin interpretieren
-               ZonedDateTime startBerlin = start.toInstant().atZone(ZoneId.of("Europe/Berlin")).plusHours(1);
-               ZonedDateTime endBerlin = end.toInstant().atZone(ZoneId.of("Europe/Berlin")).plusHours(1);
+               ZonedDateTime startBerlin = start.toInstant().atZone(ZoneId.of("Europe/Berlin"));
+               ZonedDateTime endBerlin = end.toInstant().atZone(ZoneId.of("Europe/Berlin"));
 
-            //in UTC umwandeln
+               // Prüfen, ob Sommerzeit aktiv ist
+               boolean isSummerTime = startBerlin.getZone().getRules().isDaylightSavings(startBerlin.toInstant());
+
+               // Wenn Sommerzeit, dann +2 Stunden, sonst Winterzeit mit +1 Stunde
+               if (isSummerTime) {
+                   System.out.println("🌞 Sommerzeit erkannt! +2 Stunden.");
+                   startBerlin = startBerlin.plusHours(2);  // Sommerzeit: +2 Stunden
+                   endBerlin = endBerlin.plusHours(2);      // Sommerzeit: +2 Stunden
+               } else {
+                   System.out.println("❄ Winterzeit erkannt! +1 Stunde.");
+                   startBerlin = startBerlin.plusHours(1);  // Winterzeit: +1 Stunde
+                   endBerlin = endBerlin.plusHours(1);      // Winterzeit: +1 Stunde
+               }
+
+               // in UTC umwandeln
                ZonedDateTime startUTC = startBerlin.withZoneSameInstant(ZoneId.of("UTC"));
                ZonedDateTime endUTC = endBerlin.withZoneSameInstant(ZoneId.of("UTC"));
 
                Date startDate = Date.from(startUTC.toInstant());
                Date endDate = Date.from(endUTC.toInstant());
+               
+               /*
+                // in Europe/Berlin interpretieren
+               ZonedDateTime startBerlin = start.toInstant().atZone(ZoneId.of("Europe/Berlin")).plusHours(1);
+               ZonedDateTime endBerlin = end.toInstant().atZone(ZoneId.of("Europe/Berlin")).plusHours(1);
+
+               //in UTC umwandeln
+               ZonedDateTime startUTC = startBerlin.withZoneSameInstant(ZoneId.of("UTC"));
+               ZonedDateTime endUTC = endBerlin.withZoneSameInstant(ZoneId.of("UTC"));
+
+               Date startDate = Date.from(startUTC.toInstant());
+               Date endDate = Date.from(endUTC.toInstant());
+               */
+                
                
             // Appointment speichern
                Appointment appointment = facade.newAppointmentWithUser(startDate, endDate, user);
