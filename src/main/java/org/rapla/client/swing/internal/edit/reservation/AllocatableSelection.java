@@ -64,6 +64,7 @@ import org.rapla.framework.RaplaLocale;
 import org.rapla.logger.Logger;
 import org.rapla.scheduler.Promise;
 import org.rapla.scheduler.ResolvedPromise;
+import org.rapla.scheduler.sync.SynchronizedCompletablePromise;
 import org.rapla.storage.PermissionController;
 
 import javax.inject.Inject;
@@ -1287,14 +1288,8 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         
         boolean isavailabilityConflictCount = false; //neu
         
-        RequestStatus requestStatus;
-        
+        RequestStatus requestStatus;  
          
-        
-        
-        
-        
-        
         
     }
     
@@ -1358,7 +1353,12 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
                 result.permissionConflictCount++;
             }
             
-            Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null, appointment.getEnd(), null);
+            
+            //asynchrone Abfrage, überprüft ob Verfügbarkeit und Veranstaltung Überlappung hat, wenn ja Speicherung von true in overlapAvailability
+            
+            Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null , appointment.getEnd(), null);
+            
+            
 
         	Promise<Boolean> overlapAvailability = query.thenApply((reservations) -> {
 
@@ -1389,6 +1389,25 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         	return false;
 
         	});
+        	
+        	try
+        	{
+        	    Boolean hasOverlapAvailability = SynchronizedCompletablePromise.waitFor(overlapAvailability, -1, getLogger());
+        	    result.availabilityConflicts[i] = hasOverlapAvailability;
+        	    
+        	    System.out.println("Line 1396" + hasOverlapAvailability);
+        	    
+        	}
+        	catch (Exception e)
+        	{               
+        	}
+        	
+        	
+        	
+        	
+        	
+        	
+        	
         	
         //result.availabilityConflicts[i] = overlapAvailability;
         
@@ -2117,21 +2136,36 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             
             //Hier können Sie die Erweiterung der Klasse AllocationRendering nutzen, um ein anderen Icon für Verfügbarkeitsüberschneidung anzuzeigen.
             
-            if (allocBinding.isavailabilityConflictCount == true)//diese Bedingung muss angepasst werden
-            {
-            	
-            	System.out.println("if Abfrage anderes Icon");
-            	return availabilityIcon;
-            }
-            
-            else
-            {
-            
+               
             
             
             if (allocBinding.conflictCount == 0)
             {
+            	
+            	boolean overlapAvailabilityAllAppointments = true;
+            	System.out.println("Line 2141");
+            	
+            	for(boolean b : allocBinding.availabilityConflicts)
+            		{
+            			System.out.println("Line 2145 for Schleife");
+            			overlapAvailabilityAllAppointments = overlapAvailabilityAllAppointments && b;
+            		}
+            	
+            	
+            	System.out.println("overlap" + overlapAvailabilityAllAppointments);
+            	
+            	if(overlapAvailabilityAllAppointments == true)
+            		{
+            		
+            			System.out.println("In If für neues ICON");
+            			return availabilityIcon;
+            		}
+            	else
+            	{
+            	
                 return getAvailableIcon(allocatable);
+                
+            	}
             }
             else if (allocBinding.conflictCount == appointments.length)
             {
@@ -2163,7 +2197,7 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             {
                 return getNotAlwaysAvailableIcon(allocatable);
             }
-            }
+            
 
             if (checkRestrictions && permissionController.isRequestOnly( allocatable, user,  today))
             {
