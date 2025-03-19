@@ -1356,10 +1356,9 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
             
             //asynchrone Abfrage, überprüft ob Verfügbarkeit und Veranstaltung Überlappung hat, wenn ja Speicherung von true in overlapAvailability
             
-            Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, null , appointment.getEnd(), null);
+            Promise<Collection<Reservation>> query = getQuery().getReservationsForAllocatable(new Allocatable[] {allocatable}, appointment.getStart() , appointment.getEnd(), null);
             
-            
-
+           
         	Promise<Boolean> overlapAvailability = query.thenApply((reservations) -> {
 
         		for(Reservation r : reservations)
@@ -1376,7 +1375,10 @@ public class AllocatableSelection extends RaplaGUIComponent implements Appointme
         				
         				for (Appointment a : r.getAppointments())
         				{
-        					if(a.getStart().before(appointment.getStart()) && a.getEnd().after(appointment.getEnd()))
+        					
+        					//kleiner gleich durch before oder equals
+        					if((a.getStart().before(appointment.getStart()) || a.getStart().equals(appointment.getStart())) && (a.getEnd().after(appointment.getEnd()) || a.getEnd().equals(appointment.getEnd())))
+        					
         					{
         						return true;
         					}
