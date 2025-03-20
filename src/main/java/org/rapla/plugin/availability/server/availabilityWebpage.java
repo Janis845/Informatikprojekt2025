@@ -66,12 +66,6 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
     	out.println("    <h2>Dozenten Verfügbarkeit</h2>");
     	out.println("    <label for='date'>Datum:</label>");
     	out.println("    <input type='date' id='date' name='date' required>");
-    	out.println("    <label for='raplaID' style='display:none;'>RaplaID:</label>");
-    	out.println("    <input type='hidden' id='raplaID' name='raplaID' required>");
-    	out.println("    <script>");
-    	out.println("      const urlParts = window.location.href.split('/');");
-    	out.println("      document.getElementById('raplaID').value = urlParts[urlParts.length - 1];");
-    	out.println("    </script>");
     	out.println("    <label for='starttime'>Startzeit:</label>");
     	out.println("    <input type='time' id='starttime' name='starttime' required>");
     	out.println("    <label for='endtime'>Endzeit:</label>");
@@ -103,26 +97,25 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
 
     	out.println("    function addAvailability() {");
     	out.println("      let date = document.getElementById('date').value;");
-    	out.println("      let raplaID = document.getElementById('raplaID').value;");
     	out.println("      let starttime = document.getElementById('starttime').value;");
     	out.println("      let endtime = document.getElementById('endtime').value;");
     	out.println("      let recurrence = document.getElementById('recurrence').value;");
     	out.println("      let weeks = parseInt(document.getElementById('weeks').value) || 1;");
 
-    	out.println("      if (!date || !starttime || !endtime || !raplaID) {");
+    	out.println("      if (!date || !starttime || !endtime) {");
     	out.println("        alert('Bitte alle Felder ausfüllen!');");
     	out.println("        return;");
     	out.println("      }");
 
-    	out.println("      console.log('Neue Verfügbarkeit hinzugefügt:', { date, starttime, endtime, recurrence, weeks, raplaID });");
+    	out.println("      console.log('Neue Verfügbarkeit hinzugefügt:', { date, starttime, endtime, recurrence, weeks });");
 
     	out.println("      if (recurrence === 'once') {");
-    	out.println("        availabilities.push({ date, starttime, endtime, raplaID });");
+    	out.println("        availabilities.push({ date, starttime, endtime });");
     	out.println("      } else {");
     	out.println("        for (let i = 0; i < weeks; i++) {");
     	out.println("          let nextDate = new Date(date);");
     	out.println("          nextDate.setDate(nextDate.getDate() + (7 * i));");
-    	out.println("          availabilities.push({ date: nextDate.toISOString().split('T')[0], starttime, endtime, raplaID });");
+    	out.println("          availabilities.push({ date: nextDate.toISOString().split('T')[0], starttime, endtime });");
     	out.println("        }");
     	out.println("      }");
 
@@ -164,6 +157,7 @@ public class availabilityWebpage extends AbstractHTMLCalendarPage {
     	out.println("        alert('Fehler beim Absenden: ' + error);");
     	out.println("      });");
     	out.println("    });");
+
     	out.println("  </script>");
     	out.println("</body>");
     	out.println("</html>");
