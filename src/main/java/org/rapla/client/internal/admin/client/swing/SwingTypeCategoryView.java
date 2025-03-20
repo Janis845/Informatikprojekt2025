@@ -105,7 +105,10 @@ public class SwingTypeCategoryView extends RaplaGUIComponent implements
 		// adding the ComboBox to the northPanel
 		final boolean isAdmin = isAdmin();
 		@SuppressWarnings("unchecked")
-		String[] options = isAdmin ? new String[] {getString("resource_types"), getString("person_types"), getString("reservation_type"),getString("categories"),getString("periods"),/*cambiar Hinzufügen des neuen Typs in der ComboBox*/ getString("availability_type")} : new String[] {getString("periods")};
+		//hinzugefügt (109) 1011 auskommentiert
+		String[] options = isAdmin ? new String[] {getString("resource_types"), getString("person_types"), getString("reservation_type"),getString("categories"),getString("periods"), getString("availability_type")} : new String[] {getString("periods")};
+		
+		//String[] options = isAdmin ? new String[] {getString("resource_types"), getString("person_types"), getString("reservation_type"),getString("categories"),getString("periods")} : new String[] {getString("periods")};
 		JComboBox jComboBox = new JComboBox(options);
 
 		cbView = jComboBox;
@@ -219,7 +222,7 @@ public class SwingTypeCategoryView extends RaplaGUIComponent implements
 		else if (selectedIndex == 4)
 			newView = View.PERIODS;
 		else if (selectedIndex == 5)
-			newView = View.AVAILABILITY_TYPE; //cambiar Ansicht des neuen Typs in der ComboBox
+			newView = View.AVAILABILITY_TYPE;
 		if ( newView != view)
 		{
 			view = newView;
@@ -322,12 +325,12 @@ public class SwingTypeCategoryView extends RaplaGUIComponent implements
 						selectionModel = updateTypes(pattern, valueClassificationTypeResource, title);
 						break;
 					}
-					//cambiar Alle Arten die zu dem Typ passen aufrufen
 					case AVAILABILITY_TYPE: {
 						final String title = getI18n().getString("availability_type");
 						selectionModel = updateTypes(pattern, valueClassificationTypeResource, title);
 						break;
 					}
+					
 					case PERIODS: {
 						final String title = getI18n().getString("periods");
 						selectionModel = updatePeriods(pattern,  title);
@@ -349,10 +352,11 @@ public class SwingTypeCategoryView extends RaplaGUIComponent implements
 			case PERSON_TYPE: {
 				return DynamicTypeAnnotations.VALUE_CLASSIFICATION_TYPE_PERSON;
 			}
+			
+			
 			case RESERVATION_TYPE: {
 				return DynamicTypeAnnotations.VALUE_CLASSIFICATION_TYPE_RESERVATION;
 			}
-			//cambiar Rückgabe einer Klassifikation
 			case AVAILABILITY_TYPE: {
 				return DynamicTypeAnnotations.VALUE_CLASSIFICATION_TYPE_AVAILABILITY;
 			}
@@ -390,7 +394,8 @@ public class SwingTypeCategoryView extends RaplaGUIComponent implements
 
 
 	public enum View {
-		RESOURCE_TYPE, PERSON_TYPE, RESERVATION_TYPE, /*cambiar Konstante/ Variable*/ AVAILABILITY_TYPE, CATEGORY, PERIODS
+		//RESOURCE_TYPE, PERSON_TYPE, RESERVATION_TYPE, CATEGORY, PERIODS
+		RESOURCE_TYPE, PERSON_TYPE, RESERVATION_TYPE, AVAILABILITY_TYPE, CATEGORY, PERIODS
 	}
 
 
