@@ -27,6 +27,10 @@ import org.rapla.entities.configuration.CalendarModelConfiguration;
 import org.rapla.entities.configuration.Preferences;
 import org.rapla.entities.configuration.RaplaMap;
 import org.rapla.entities.domain.Allocatable;
+import org.rapla.entities.domain.Appointment;
+import org.rapla.entities.domain.Reservation;
+import org.rapla.entities.dynamictype.Classification;
+import org.rapla.entities.storage.ReferenceInfo;
 import org.rapla.facade.CalendarNotFoundExeption;
 import org.rapla.facade.CalendarSelectionModel;
 import org.rapla.facade.RaplaFacade;
@@ -67,11 +71,15 @@ import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -79,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -121,7 +130,6 @@ public class AvailabilityPageGenerator
    }
 
    private static final int MAX_AVAILABILITIES = 100;
-   private static final List<Availability> availabilityList = new ArrayList<>();
    private static final Gson gson = new Gson(); // JSON-Handler
    private Map<String, String> generatedUrls = new HashMap<>();
 
@@ -511,7 +519,7 @@ public class AvailabilityPageGenerator
        return Response.ok("Verfügbarkeit gespeichert!").build();
    }
 
-
+*/
 
    
    private void writeStacktrace(HttpServletResponse response, Exception ex) throws IOException
