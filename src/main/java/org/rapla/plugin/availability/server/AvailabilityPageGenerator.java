@@ -27,6 +27,10 @@ import org.rapla.entities.configuration.CalendarModelConfiguration;
 import org.rapla.entities.configuration.Preferences;
 import org.rapla.entities.configuration.RaplaMap;
 import org.rapla.entities.domain.Allocatable;
+import org.rapla.entities.domain.Appointment;
+import org.rapla.entities.domain.Reservation;
+import org.rapla.entities.dynamictype.Classification;
+import org.rapla.entities.storage.ReferenceInfo;
 import org.rapla.facade.CalendarNotFoundExeption;
 import org.rapla.facade.CalendarSelectionModel;
 import org.rapla.facade.RaplaFacade;
@@ -43,6 +47,7 @@ import org.rapla.server.extensionpoints.HTMLViewPage;
 import org.rapla.storage.StorageOperator;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import ch.qos.logback.classic.Level;
@@ -67,11 +72,15 @@ import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -79,6 +88,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -119,6 +129,11 @@ public class AvailabilityPageGenerator
    public AvailabilityPageGenerator()
    {
    }
+
+   private static final int MAX_AVAILABILITIES = 100;
+   private static final List<Availability> availabilityList = new ArrayList<>();
+   private static final Gson gson = new Gson(); // JSON-Handler
+   private Map<String, String> generatedUrls = new HashMap<>();
 
    public RaplaFacade getFacade() {
        return facade;
@@ -319,6 +334,192 @@ public class AvailabilityPageGenerator
 
    }
    
+// Method to receive Data and to save it -> JSON
+   
+   @POST
+   @Consumes("application/json")
+   @Produces("text/plain")
+   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities, @Context HttpServletRequest request, @PathParam("id") String path) {
+       try {
+           System.out.println("🚀 POST-Request empfangen!");
+
+           // Benutzer und Allocatable aus dem System holen
+           final User user = facade.getUser("admin");
+           String recievedRaplaID = null; 
+          
+           // Neue Reservierung erstellen
+           Classification classification = facade.getDynamicType("availability1").newClassification(); //achtung vom Typ Veanstaltung, aber brauchen Typ Verfügbarkeit
+           // Name des Events setzen
+           classification.setValue("name", "Verfügbar");
+           Reservation event = facade.newReservation(classification, user);
+
+           // Verfügbarkeiten durchlaufen und Appointments hinzufügen
+           for (com.google.gson.internal.LinkedTreeMap availability : availabilities) {
+               System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
+
+               // Start- und Endzeit aus dem JSON-Objekt extrahieren
+               String startStr = (String) availability.get("starttime");
+               String endStr = (String) availability.get("endtime");
+               String dateStr = (String) availability.get("date");
+               recievedRaplaID = (String) availability.get("raplaID");
+
+               // Zeitformat anpassen (z. B. ISO 8601: "2025-03-15 09:00")
+               SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+               dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+               Date start = dateFormat.parse(dateStr +" " + startStr);
+               Date end = dateFormat.parse(dateStr +" " +endStr);
+                        
+               ZonedDateTime startBerlin = start.toInstant().atZone(ZoneId.of("Europe/Berlin"));
+               ZonedDateTime endBerlin = end.toInstant().atZone(ZoneId.of("Europe/Berlin"));
+
+               // Prüfen, ob Sommerzeit aktiv ist
+               boolean isSummerTime = startBerlin.getZone().getRules().isDaylightSavings(startBerlin.toInstant());
+
+               // Wenn Sommerzeit, dann +2 Stunden, sonst Winterzeit mit +1 Stunde
+               if (isSummerTime) {
+                   System.out.println("🌞 Sommerzeit erkannt! +2 Stunden.");
+                   startBerlin = startBerlin.plusHours(2);  // Sommerzeit: +2 Stunden
+                   endBerlin = endBerlin.plusHours(2);      // Sommerzeit: +2 Stunden
+               } else {
+                   System.out.println("❄ Winterzeit erkannt! +1 Stunde.");
+                   startBerlin = startBerlin.plusHours(1);  // Winterzeit: +1 Stunde
+                   endBerlin = endBerlin.plusHours(1);      // Winterzeit: +1 Stunde
+               }
+
+               // in UTC umwandeln
+               ZonedDateTime startUTC = startBerlin.withZoneSameInstant(ZoneId.of("UTC"));
+               ZonedDateTime endUTC = endBerlin.withZoneSameInstant(ZoneId.of("UTC"));
+
+               Date startDate = Date.from(startUTC.toInstant());
+               Date endDate = Date.from(endUTC.toInstant());
+               
+               /*
+                // in Europe/Berlin interpretieren
+               ZonedDateTime startBerlin = start.toInstant().atZone(ZoneId.of("Europe/Berlin")).plusHours(1);
+               ZonedDateTime endBerlin = end.toInstant().atZone(ZoneId.of("Europe/Berlin")).plusHours(1);
+
+               //in UTC umwandeln
+               ZonedDateTime startUTC = startBerlin.withZoneSameInstant(ZoneId.of("UTC"));
+               ZonedDateTime endUTC = endBerlin.withZoneSameInstant(ZoneId.of("UTC"));
+
+               Date startDate = Date.from(startUTC.toInstant());
+               Date endDate = Date.from(endUTC.toInstant());
+               */
+                
+               
+            // Appointment speichern
+               Appointment appointment = facade.newAppointmentWithUser(startDate, endDate, user);
+               event.addAppointment(appointment);
+           }
+           
+           Allocatable allocatable = facade.resolve(new ReferenceInfo<Allocatable>(recievedRaplaID, Allocatable.class));
+  
+
+
+           // Allocatable (z. B. Raum) zuweisen
+           event.addAllocatable(allocatable);
+
+           // Reservierung speichern
+           facade.storeObjects(new Reservation[]{event});
+
+           System.out.println("✅ Reservierung erfolgreich erstellt!");
+           return Response.ok("Erfolgreich empfangen und gespeichert").build();
+       } catch (Exception e) {
+           e.printStackTrace();
+           return Response.status(Response.Status.BAD_REQUEST).entity("Fehler beim Verarbeiten der Anfrage").build();
+       }
+   }
+   
+   /*
+   @POST
+   @Consumes("application/json")
+   @Produces("text/plain")
+  
+   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities, @Context HttpServletRequest request, @PathParam("id")  String path) {
+       try {
+           System.out.println("🚀 POST-Request empfangen!");
+
+           // Verfügbarkeiten durchlaufen und ausgeben
+           for (com.google.gson.internal.LinkedTreeMap availability : availabilities) {
+               System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
+           }
+           final User user = facade.getUser("admin");
+           String raplaID = "r8c5fee3-ab5e-4995-aa72-234c77cb7193";
+           Allocatable allocatable = facade.resolve(new ReferenceInfo<Allocatable>(raplaID, Allocatable.class));
+           facade.newReservation(null, user);
+           
+           generatedUrls.containsKey(request.getRequestURL().toString());
+           System.out.println("URL: " + request.getRequestURL().toString());
+           
+           
+           //event.addAllocatable(raplaID);
+          
+          // private Appointment newAppointment(User user,Date begin, Date end) throws RaplaException {
+          // Appointment appointment = facade.newAppointmentWithUser(begin,end,user);
+          // return appointment;
+           
+           //event.addAppointment( appointment);
+           //lookupEvent = facade.newReservation(classification,user);
+       }
+           
+           facade.getAllocatables();
+           return Response.ok("Erfolgreich empfangen").build();
+       } 
+       
+       catch (Exception e) {
+           e.printStackTrace();
+           return Response.status(Response.Status.BAD_REQUEST).entity("Invalid JSON format").build();
+       }
+   }
+   
+   */
+   
+  /*
+   @POST
+   @Path("{id}")
+   @Consumes("application/json")
+   @Produces("text/plain")
+   public Response handleAvailability(List<com.google.gson.internal.LinkedTreeMap> availabilities, @Context HttpServletRequest request, @PathParam("id") String path) {
+       try {
+           System.out.println("🚀 POST-Request empfangen!");
+
+           // Verfügbarkeiten durchlaufen und ausgeben
+           for (com.google.gson.internal.LinkedTreeMap availability : availabilities) {
+               System.out.println("📅 Erhaltene Verfügbarkeit: " + availability);
+               System.out.println("📌 Extrahierte ID: " + path);
+               System.out.println("URL: " + request.getRequestURL().toString());
+           }
+           
+           final User user = facade.getUser("admin");
+           generatedUrls.containsKey(request.getRequestURL().toString());
+           System.out.println("URL: " + request.getRequestURL().toString());
+           
+           
+           facade.getAllocatables();
+
+           return Response.ok("Erfolgreich empfangen").build();
+
+       } catch (Exception e) {
+           e.printStackTrace();
+           return Response.status(Response.Status.BAD_REQUEST).entity("Invalid JSON format").build();
+       }
+   }
+*/
+   
+   //Variante 2: Method to receive Data and to save it -> String
+   /*@POST
+   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+   @Produces(MediaType.TEXT_PLAIN)
+   public Response handleAvailability(
+       @FormParam("firstname") String firstname,
+       @FormParam("lastname") String lastname,
+       @FormParam("date") String date,
+       @FormParam("day") String day) {
+
+       System.out.println("Empfangene Daten: " + firstname + " " + lastname + " am " + date + " (" + day + ")");
+       
+       return Response.ok("Verfügbarkeit gespeichert!").build();
+   }
 
 
 
